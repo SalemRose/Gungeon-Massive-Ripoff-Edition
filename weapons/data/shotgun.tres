@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://weapons/weapon_data.gd" id="1_wd"]
+
+[resource]
+script = ExtResource("1_wd")
+display_name = "Shotgun"
+color = Color(1, 0.55, 0.3, 1)
+fire_mode = 0
+fire_rate = 1.4
+projectiles_per_shot = 7
+spread_degrees = 28.0
+inaccuracy_degrees = 3.0
+damage = 3.5
+bullet_speed = 450.0
+bullet_lifetime = 0.55
+speed_variance = 0.12
+magazine_size = 6
+infinite_ammo = false
+max_reserve_ammo = 60
+starting_reserve_ammo = 36
+reload_time = 1.6
+screen_shake = 4.0

@@ -1,0 +1,10 @@
+;paint.net Palette File
+;Downloaded from Lospec.com/palette-list
+;Palette Name: 5 SHEEP
+;Description: AA and values palette for sketches to give a warm feel to the most mundane of tasks.
+;Colors: 5
+FF480a30
+FFb41360
+FFff327c
+FFff80ae
+FFffdae8

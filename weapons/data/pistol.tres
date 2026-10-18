@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://weapons/weapon_data.gd" id="1_wd"]
+
+[resource]
+script = ExtResource("1_wd")
+display_name = "Pistol"
+color = Color(1, 0.9, 0.4, 1)
+fire_mode = 0
+fire_rate = 5.0
+projectiles_per_shot = 1
+spread_degrees = 0.0
+inaccuracy_degrees = 1.5
+damage = 5.0
+bullet_speed = 520.0
+bullet_lifetime = 1.2
+magazine_size = 12
+infinite_ammo = true
+max_reserve_ammo = 0
+starting_reserve_ammo = 0
+reload_time = 1.0
+screen_shake = 1.0

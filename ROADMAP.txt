@@ -1,0 +1,13 @@
+main menu:
+title 
+new game
+load
+settings
+quit
+
+
+settings:
+resolution (use sets of standard resolutions)
+fullscreen toggle
+music volume
+sfx volume

@@ -1,0 +1,29 @@
+;paint.net Palette File
+;Downloaded from Lospec.com/palette-list
+;Palette Name: Lovecraftian Lens
+;Description: The oldest and strongest emotion of mankind is fear, and the oldest and strongest kind of fear is fear of the unknown.<p>&nbsp; - H. P. Lovecraft</p>
+;Colors: 24
+FF778c96
+FF6f6d7f
+FF655269
+FF553e4d
+FF48313b
+FF5e363e
+FF7b383a
+FF904a40
+FFa56850
+FFa18463
+FF7a7b59
+FF5b6d4e
+FF445d46
+FF32453b
+FF262d2f
+FF2a3c3d
+FF295555
+FF30716f
+FF438b88
+FF61a19f
+FF83b3b0
+FF7e8d87
+FF70706e
+FF5e5356

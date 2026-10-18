@@ -1,0 +1,29 @@
+;paint.net Palette File
+;Downloaded from Lospec.com/palette-list
+;Palette Name: Maggot24
+;Description: Palette I made for my piece. It has a main warm and very saturated red ramp, useful for "realistic" blood, and a cold, greenish ramp to make slime and other filthy stuff, plus some usable browns and greys etc.<br>
+;Colors: 24
+FF201114
+FF30171a
+FF4a0a00
+FF630f00
+FF742401
+FF8f2100
+FFa13300
+FFb45102
+FFc67c3c
+FFc8a589
+FFded6c3
+FFefede9
+FFb6b6b4
+FF85977f
+FF7b7d72
+FF6a756f
+FF786959
+FF5d5656
+FF475059
+FF514656
+FF85383b
+FF543634
+FF492b1d
+FF212226

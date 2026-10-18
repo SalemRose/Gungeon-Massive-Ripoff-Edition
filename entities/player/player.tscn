@@ -1,0 +1,57 @@
+[gd_scene format=3 uid="uid://didrbsfmvpt44"]
+
+[ext_resource type="Script" uid="uid://jjyf41s31txg" path="res://entities/player/player.gd" id="1_player"]
+[ext_resource type="Script" uid="uid://c4m7damwfxxe7" path="res://weapons/weapon_manager.gd" id="2_wm"]
+[ext_resource type="Script" uid="uid://dxtpj3p17g5ex" path="res://weapons/weapon_data.gd" id="3_wd"]
+[ext_resource type="Resource" path="res://weapons/data/pistol.tres" id="4_pistol"]
+[ext_resource type="Resource" path="res://weapons/data/smg.tres" id="5_smg"]
+[ext_resource type="Resource" path="res://weapons/data/shotgun.tres" id="6_shotgun"]
+[ext_resource type="Resource" path="res://weapons/data/ricochet.tres" id="7_ricochet"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 8.0
+
+[node name="Player" type="CharacterBody2D" unique_id=1512219092]
+collision_layer = 2
+collision_mask = 5
+motion_mode = 1
+script = ExtResource("1_player")
+move_speed = 270.0
+roll_speed = 450.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=871428232]
+shape = SubResource("CircleShape2D_body")
+
+[node name="Visual" type="Node2D" parent="." unique_id=599563902]
+
+[node name="Body" type="Polygon2D" parent="Visual" unique_id=1674047680]
+color = Color(0.25, 0.55, 0.95, 1)
+polygon = PackedVector2Array(9.659, 2.588, 7.071, 7.071, 2.588, 9.659, -2.588, 9.659, -7.071, 7.071, -9.659, 2.588, -9.659, -2.588, -7.071, -7.071, -2.588, -9.659, 2.588, -9.659, 7.071, -7.071, 9.659, -2.588)
+
+[node name="Marker" type="Polygon2D" parent="Visual" unique_id=948951249]
+position = Vector2(1, 4)
+color = Color(0.08, 0.2, 0.45, 1)
+polygon = PackedVector2Array(2, -6, 6, -6, 6, -2, 2, -2)
+
+[node name="AimPivot" type="Node2D" parent="." unique_id=1285828060]
+
+[node name="GunPlaceholder" type="Polygon2D" parent="AimPivot" unique_id=2005038291]
+color = Color(0.75, 0.75, 0.8, 1)
+polygon = PackedVector2Array(9, -2, 23, -2, 23, 2, 9, 2)
+
+[node name="Muzzle" type="Marker2D" parent="AimPivot" unique_id=923433291]
+position = Vector2(24, 0)
+
+[node name="Flash" type="Polygon2D" parent="AimPivot/Muzzle" unique_id=1140293680]
+visible = false
+color = Color(1, 0.95, 0.6, 1)
+polygon = PackedVector2Array(-2, 0, 3, -4, 11, 0, 3, 4)
+
+[node name="WeaponManager" type="Node" parent="." unique_id=1501410593]
+script = ExtResource("2_wm")
+starting_weapons = Array[ExtResource("3_wd")]([ExtResource("4_pistol"), ExtResource("5_smg"), ExtResource("6_shotgun"), ExtResource("7_ricochet")])
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1383762412]
+zoom = Vector2(2, 2)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0

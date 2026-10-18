@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://entities/projectiles/bullet.gd" id="1_bullet"]
+
+[node name="Bullet" type="Node2D"]
+script = ExtResource("1_bullet")
+
+[node name="Visual" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(5, 0, 0, 2.5, -4, 0, 0, -2.5)

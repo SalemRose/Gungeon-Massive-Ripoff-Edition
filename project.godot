@@ -1,8 +1,44 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
 config_version=5
 
 [application]
+
 config/name="Gungeon Massive Ripoff Edition"
+run/main_scene="res://levels/test_room/test_room.tscn"
 config/features=PackedStringArray("4.7")
 config/icon="res://assets/icon.svg"
 
+[autoload]
 
+InputSetup="*res://autoload/input_setup.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+
+[dotnet]
+
+project/assembly_name="Gungeon Massive Ripoff Edition"
+
+[layer_names]
+
+2d_physics/layer_1="world"
+2d_physics/layer_2="player"
+2d_physics/layer_3="enemy"
+2d_physics/layer_4="player_projectile"
+2d_physics/layer_5="enemy_projectile"
+2d_physics/layer_6="pickup"
+2d_physics/layer_7="interactable"
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://weapons/weapon_data.gd" id="1_wd"]
+
+[resource]
+script = ExtResource("1_wd")
+display_name = "Ricochet"
+color = Color(0.7, 1, 0.5, 1)
+fire_mode = 0
+fire_rate = 3.0
+projectiles_per_shot = 1
+spread_degrees = 0.0
+inaccuracy_degrees = 1.0
+damage = 7.0
+bullet_speed = 420.0
+bullet_lifetime = 2.2
+bounces = 3
+magazine_size = 6
+infinite_ammo = false
+max_reserve_ammo = 90
+starting_reserve_ammo = 48
+reload_time = 1.2
+screen_shake = 2.0

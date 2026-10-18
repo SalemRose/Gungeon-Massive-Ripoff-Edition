@@ -1,0 +1,29 @@
+;paint.net Palette File
+;Downloaded from Lospec.com/palette-list
+;Palette Name: Crystalline_Moss
+;Description: Made for the PJ competition. Palette intended for portraits of magical creatures. Usually stay away from white, but here it was necessary for extra bling.
+;Colors: 24
+FF6e1835
+FF942341
+FFa03d4c
+FFa6575d
+FFbc827c
+FFd4b29f
+FFd0c0c1
+FFdddddd
+FFadb6b7
+FF6caba6
+FF3b524a
+FF2d3d3d
+FF303630
+FF2b2b0d
+FF4d492e
+FF76553c
+FFa79692
+FF766e6e
+FF534b4b
+FF512b2e
+FF733d40
+FF4a3f44
+FF282828
+FF191216

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://weapons/weapon_data.gd" id="1_wd"]
+
+[resource]
+script = ExtResource("1_wd")
+display_name = "SMG"
+color = Color(0.5, 0.9, 1, 1)
+fire_mode = 1
+fire_rate = 12.0
+projectiles_per_shot = 1
+spread_degrees = 0.0
+inaccuracy_degrees = 6.0
+damage = 2.5
+bullet_speed = 560.0
+bullet_lifetime = 1.0
+magazine_size = 30
+infinite_ammo = false
+max_reserve_ammo = 300
+starting_reserve_ammo = 240
+reload_time = 1.5
+screen_shake = 0.8

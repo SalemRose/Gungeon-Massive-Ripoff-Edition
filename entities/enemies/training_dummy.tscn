@@ -1,0 +1,33 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://entities/enemies/training_dummy.gd" id="1_dummy"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_dummy"]
+radius = 14.0
+
+[node name="TrainingDummy" type="StaticBody2D"]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1_dummy")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_dummy")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="Body" type="Polygon2D" parent="Visual"]
+color = Color(0.85, 0.35, 0.35, 1)
+polygon = PackedVector2Array(13.731, 2.731, 11.641, 7.778, 7.778, 11.641, 2.731, 13.731, -2.731, 13.731, -7.778, 11.641, -11.641, 7.778, -13.731, 2.731, -13.731, -2.731, -11.641, -7.778, -7.778, -11.641, -2.731, -13.731, 2.731, -13.731, 7.778, -11.641, 11.641, -7.778, 13.731, -2.731)
+
+[node name="Face" type="Polygon2D" parent="Visual"]
+color = Color(0.4, 0.1, 0.1, 1)
+polygon = PackedVector2Array(-7, -2, 7, -2, 7, 2, -7, 2)
+
+[node name="HealthLabel" type="Label" parent="."]
+offset_left = -20.0
+offset_top = 16.0
+offset_right = 20.0
+offset_bottom = 32.0
+theme_override_font_sizes/font_size = 10
+text = "100"
+horizontal_alignment = 1
