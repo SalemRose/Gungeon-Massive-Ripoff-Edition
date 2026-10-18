@@ -1,0 +1,12 @@
+[config]
+version=1
+
+[launcher]
+version=1.13.0
+project_name="Gungeon Massive Ripoff Edition"
+
+[editor]
+channel=official
+flavor=dotnet
+base_version=4.7
+version=4.7.2-stable
