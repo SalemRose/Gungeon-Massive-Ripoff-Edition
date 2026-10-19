@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Gungeon Massive Ripoff Edition"
-run/main_scene="res://levels/test_room/test_room.tscn"
+run/main_scene="res://levels/test_level/test_level.tscn"
 config/features=PackedStringArray("4.7")
 config/icon="res://assets/icon.svg"
 
@@ -41,4 +41,5 @@ project/assembly_name="Gungeon Massive Ripoff Edition"
 
 [rendering]
 
+environment/defaults/default_clear_color=Color(0.05, 0.05, 0.07, 1)
 textures/canvas_textures/default_texture_filter=0

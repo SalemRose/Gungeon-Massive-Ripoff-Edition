@@ -10,11 +10,13 @@ extends CanvasLayer
 @onready var weapon_label: Label = $Root/WeaponLabel
 @onready var ammo_label: Label = $Root/AmmoLabel
 @onready var reload_bar: ProgressBar = $Root/ReloadBar
+@onready var room_label: Label = $RoomLabel
 
 var _player: Player
 
 
 func _process(_delta: float) -> void:
+	_update_room_label()
 	if _player == null:
 		_player = get_tree().get_first_node_in_group("player") as Player
 		return
@@ -35,3 +37,13 @@ func _process(_delta: float) -> void:
 	reload_bar.value = weapon.reload_progress()
 	if weapon.reloading:
 		ammo_label.text = "RELOADING"
+
+
+## Shows wave progress while the player is locked in a fight, otherwise nothing.
+func _update_room_label() -> void:
+	var text := ""
+	for room in get_tree().get_nodes_in_group("rooms"):
+		text = (room as Room).status_text()
+		if text != "":
+			break
+	room_label.text = text
