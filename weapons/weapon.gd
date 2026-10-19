@@ -15,7 +15,6 @@ signal dry_fired
 
 const DEFAULT_BULLET: PackedScene = preload("res://entities/projectiles/bullet.tscn")
 ## Physics layers (see project.godot): bits are 1 = world, 4 = enemy.
-const WORLD_MASK := 1
 const PLAYER_BULLET_HIT_MASK := 1 | 4
 
 var data: WeaponData
@@ -89,7 +88,7 @@ func try_fire(muzzle_position: Vector2, aim: Vector2) -> bool:
 	if not can_fire():
 		return false
 
-	var origin := _safe_origin(muzzle_position)
+	var origin := Bullet.safe_spawn_position(shooter, muzzle_position)
 	var count := maxi(1, data.projectiles_per_shot)
 	for i in count:
 		# Evenly spread the bullets across the cone, centred on the aim...
@@ -139,15 +138,6 @@ func _finish_reload() -> void:
 		magazine += taken
 		reserve -= taken
 	reload_finished.emit()
-
-
-## If the muzzle has poked through a wall (player pressed against it), spawn the
-## bullet at the player's centre instead so it hits the wall straight away
-## rather than appearing on the far side.
-func _safe_origin(muzzle_position: Vector2) -> Vector2:
-	var query := PhysicsRayQueryParameters2D.create(shooter.global_position, muzzle_position, WORLD_MASK)
-	var hit := shooter.get_world_2d().direct_space_state.intersect_ray(query)
-	return shooter.global_position if not hit.is_empty() else muzzle_position
 
 
 func _spawn_bullet(origin: Vector2, direction: Vector2) -> void:

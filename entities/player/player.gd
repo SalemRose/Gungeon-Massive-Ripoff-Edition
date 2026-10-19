@@ -205,8 +205,11 @@ func _update_visuals() -> void:
 		visual.rotation = 0.0
 		visual.scale = Vector2.ONE
 
-	# Half-transparent while invincible so you can see the i-frames working.
-	visual.modulate.a = 0.5 if is_invincible() else 1.0
+	# Red tint after being hit, half-transparent while invincible (so you can
+	# see the i-frames working).
+	var tint := Color(1.0, 0.45, 0.45) if _hurt_iframes_left > 0.0 else Color.WHITE
+	tint.a = 0.5 if is_invincible() else 1.0
+	visual.modulate = tint
 
 	# Muzzle flash: visible for a few frames after each shot.
 	_flash_left = maxf(0.0, _flash_left - get_physics_process_delta_time())
@@ -228,6 +231,7 @@ func take_damage(amount: float) -> bool:
 		return false
 	health = maxi(0, health - ceili(amount))
 	_hurt_iframes_left = hurt_iframes
+	add_shake(5.0)
 	health_changed.emit(health, max_health)
 	if health == 0:
 		state = State.DEAD

@@ -16,7 +16,8 @@ extends Node2D
 ## false to let the bullet fly on (the player's dodge roll does this).
 ##
 ## ART: everything visible is under the `Visual` node. Replace its polygon with
-## a sprite later; this script only reads/changes Visual's colour.
+## a sprite later; this script only tints Visual (via `modulate`), which works
+## on any kind of node. Keep the art white/neutral if you want the tint to show.
 
 @export var speed: float = 500.0
 @export var damage: float = 1.0
@@ -28,6 +29,9 @@ extends Node2D
 @export_flags_2d_physics var hit_mask: int = 5
 @export var color: Color = Color(1.0, 0.9, 0.4)
 
+## Physics layer bit for walls and other solid level geometry.
+const WORLD_MASK := 1
+
 var direction: Vector2 = Vector2.RIGHT
 
 var _age: float = 0.0
@@ -35,11 +39,11 @@ var _age: float = 0.0
 ## bullet can't hit the same enemy twice or get stuck inside a rolling player.
 var _ignored: Array[RID] = []
 
-@onready var visual: Polygon2D = $Visual
+@onready var visual: Node2D = $Visual
 
 
 func _ready() -> void:
-	visual.color = color
+	visual.modulate = color
 	rotation = direction.angle()
 
 
@@ -83,3 +87,50 @@ func _handle_hit(hit: Dictionary) -> void:
 		global_position += hit.normal * 0.5  # nudge off the wall so we don't re-hit it
 	else:
 		queue_free()
+
+
+## One-call bullet creation, used by enemies (the player's Weapon builds its
+## bullets itself because it also applies spread and speed variance).
+## The bullet is added next to `shooter` (into the level, not under the shooter),
+## so it keeps its own position when the shooter moves and disappears with the
+## level when that is freed. The start position goes through
+## safe_spawn_position(), so a shooter pressed against a wall can't leak
+## bullets through it.
+static func spawn(
+	scene: PackedScene,
+	shooter: Node2D,
+	muzzle_position: Vector2,
+	direction: Vector2,
+	speed: float,
+	damage: float,
+	lifetime: float,
+	hit_mask: int,
+	color: Color,
+	bounces: int = 0,
+	pierce: int = 0,
+) -> Bullet:
+	var bullet := scene.instantiate() as Bullet
+	bullet.direction = direction
+	bullet.speed = speed
+	bullet.damage = damage
+	bullet.lifetime = lifetime
+	bullet.hit_mask = hit_mask
+	bullet.color = color
+	bullet.bounces = bounces
+	bullet.pierce = pierce
+
+	var origin := safe_spawn_position(shooter, muzzle_position)
+	shooter.get_parent().add_child(bullet)
+	bullet.global_position = origin  # set after add_child so it is in world space
+	return bullet
+
+
+## Where a bullet fired by `shooter` should appear. Normally `wanted` (the
+## muzzle), but if a wall lies between the shooter and the muzzle (shooter
+## pressed against a wall) we spawn at the shooter's centre instead, so the
+## bullet hits the wall straight away instead of appearing on the far side.
+## Shared by the player's weapons and by enemy patterns.
+static func safe_spawn_position(shooter: Node2D, wanted: Vector2) -> Vector2:
+	var query := PhysicsRayQueryParameters2D.create(shooter.global_position, wanted, WORLD_MASK)
+	var hit := shooter.get_world_2d().direct_space_state.intersect_ray(query)
+	return shooter.global_position if not hit.is_empty() else wanted

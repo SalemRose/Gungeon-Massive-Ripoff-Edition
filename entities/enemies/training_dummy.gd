@@ -24,7 +24,7 @@ func take_damage(amount: float) -> bool:
 	health -= amount
 	total_damage_taken += amount
 	_flash()
-	_spawn_damage_number(amount)
+	FloatingText.spawn(get_parent(), global_position + Vector2(0.0, -34.0), ("%.1f" % amount).trim_suffix(".0"))
 	if health <= 0.0:
 		health = max_health  # training dummies are immortal
 	_refresh_label()
@@ -39,16 +39,3 @@ func _flash() -> void:
 	visual.modulate = Color(3.0, 3.0, 3.0)  # over-bright = flash white
 	var tween := create_tween()
 	tween.tween_property(visual, "modulate", Color.WHITE, 0.1)
-
-
-func _spawn_damage_number(amount: float) -> void:
-	var label := Label.new()
-	label.text = ("%.1f" % amount).trim_suffix(".0")
-	label.position = Vector2(randf_range(-14.0, 6.0), -34.0)
-	label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
-	label.add_theme_font_size_override("font_size", 10)
-	add_child(label)
-	var tween := create_tween().set_parallel(true)
-	tween.tween_property(label, "position:y", label.position.y - 22.0, 0.6)
-	tween.tween_property(label, "modulate:a", 0.0, 0.6)
-	tween.chain().tween_callback(label.queue_free)

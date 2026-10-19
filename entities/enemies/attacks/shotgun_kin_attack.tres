@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EnemyAttack" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://entities/enemies/enemy_attack.gd" id="1_atk"]
+
+[resource]
+script = ExtResource("1_atk")
+display_name = "Fan"
+windup_time = 0.6
+cooldown = 2.4
+cooldown_jitter = 0.4
+attack_range = 240.0
+shots = 1
+shot_interval = 0.15
+bullets_per_shot = 5
+arc_degrees = 40.0
+aim_at_player = true
+bullet_speed = 190.0
+bullet_damage = 2.0
+bullet_lifetime = 3.0

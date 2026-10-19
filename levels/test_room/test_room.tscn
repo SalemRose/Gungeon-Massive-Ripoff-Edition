@@ -1,7 +1,7 @@
-[gd_scene format=3 uid="uid://bsj2nbxdhhieb"]
+[gd_scene load_steps=7 format=3]
 
-[ext_resource type="Script" uid="uid://c0bi1tgvexw28" path="res://levels/test_room/test_room.gd" id="1_room"]
-[ext_resource type="PackedScene" uid="uid://didrbsfmvpt44" path="res://entities/player/player.tscn" id="2_player"]
+[ext_resource type="Script" path="res://levels/test_room/test_room.gd" id="1_room"]
+[ext_resource type="PackedScene" path="res://entities/player/player.tscn" id="2_player"]
 [ext_resource type="PackedScene" path="res://entities/enemies/training_dummy.tscn" id="3_dummy"]
 [ext_resource type="PackedScene" path="res://ui/hud/hud.tscn" id="4_hud"]
 
@@ -14,115 +14,118 @@ size = Vector2(32, 564)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pillar"]
 size = Vector2(48, 48)
 
-[node name="TestRoom" type="Node2D" unique_id=94747271]
+[node name="TestRoom" type="Node2D"]
 script = ExtResource("1_room")
 
-[node name="Walls" type="Node2D" parent="." unique_id=1622736824]
+[node name="Walls" type="Node2D" parent="."]
 
-[node name="WallTop" type="StaticBody2D" parent="Walls" unique_id=951849240]
+[node name="WallTop" type="StaticBody2D" parent="Walls"]
 position = Vector2(0, -266)
+collision_layer = 1
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/WallTop" unique_id=1747157578]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/WallTop"]
 shape = SubResource("RectangleShape2D_wall_h")
 
-[node name="Visual" type="Polygon2D" parent="Walls/WallTop" unique_id=964986814]
+[node name="Visual" type="Polygon2D" parent="Walls/WallTop"]
 color = Color(0.32, 0.3, 0.38, 1)
 polygon = PackedVector2Array(-432, -16, 432, -16, 432, 16, -432, 16)
 
-[node name="WallBottom" type="StaticBody2D" parent="Walls" unique_id=1646073344]
+[node name="WallBottom" type="StaticBody2D" parent="Walls"]
 position = Vector2(0, 266)
+collision_layer = 1
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/WallBottom" unique_id=637343313]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/WallBottom"]
 shape = SubResource("RectangleShape2D_wall_h")
 
-[node name="Visual" type="Polygon2D" parent="Walls/WallBottom" unique_id=1739048092]
+[node name="Visual" type="Polygon2D" parent="Walls/WallBottom"]
 color = Color(0.32, 0.3, 0.38, 1)
 polygon = PackedVector2Array(-432, -16, 432, -16, 432, 16, -432, 16)
 
-[node name="WallLeft" type="StaticBody2D" parent="Walls" unique_id=1341488524]
+[node name="WallLeft" type="StaticBody2D" parent="Walls"]
 position = Vector2(-416, 0)
+collision_layer = 1
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/WallLeft" unique_id=430898484]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/WallLeft"]
 shape = SubResource("RectangleShape2D_wall_v")
 
-[node name="Visual" type="Polygon2D" parent="Walls/WallLeft" unique_id=1940952748]
+[node name="Visual" type="Polygon2D" parent="Walls/WallLeft"]
 color = Color(0.32, 0.3, 0.38, 1)
 polygon = PackedVector2Array(-16, -282, 16, -282, 16, 282, -16, 282)
 
-[node name="WallRight" type="StaticBody2D" parent="Walls" unique_id=565422221]
+[node name="WallRight" type="StaticBody2D" parent="Walls"]
 position = Vector2(416, 0)
+collision_layer = 1
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/WallRight" unique_id=1305249655]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/WallRight"]
 shape = SubResource("RectangleShape2D_wall_v")
 
-[node name="Visual" type="Polygon2D" parent="Walls/WallRight" unique_id=960543952]
+[node name="Visual" type="Polygon2D" parent="Walls/WallRight"]
 color = Color(0.32, 0.3, 0.38, 1)
 polygon = PackedVector2Array(-16, -282, 16, -282, 16, 282, -16, 282)
 
-[node name="Pillars" type="Node2D" parent="." unique_id=539794466]
+[node name="Pillars" type="Node2D" parent="."]
 
-[node name="PillarA" type="StaticBody2D" parent="Pillars" unique_id=1129124439]
+[node name="PillarA" type="StaticBody2D" parent="Pillars"]
 position = Vector2(-150, -70)
+collision_layer = 1
 collision_mask = 0
-metadata/_edit_group_ = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Pillars/PillarA" unique_id=1498551231]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Pillars/PillarA"]
 shape = SubResource("RectangleShape2D_pillar")
 
-[node name="Visual" type="Polygon2D" parent="Pillars/PillarA" unique_id=1015880887]
+[node name="Visual" type="Polygon2D" parent="Pillars/PillarA"]
 color = Color(0.45, 0.42, 0.52, 1)
 polygon = PackedVector2Array(-24, -24, 24, -24, 24, 24, -24, 24)
 
-[node name="PillarB" type="StaticBody2D" parent="Pillars" unique_id=402301796]
-position = Vector2(160, 91)
+[node name="PillarB" type="StaticBody2D" parent="Pillars"]
+position = Vector2(160, 90)
+collision_layer = 1
 collision_mask = 0
-metadata/_edit_group_ = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Pillars/PillarB" unique_id=937929815]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Pillars/PillarB"]
 shape = SubResource("RectangleShape2D_pillar")
 
-[node name="Visual" type="Polygon2D" parent="Pillars/PillarB" unique_id=998654303]
+[node name="Visual" type="Polygon2D" parent="Pillars/PillarB"]
 color = Color(0.45, 0.42, 0.52, 1)
 polygon = PackedVector2Array(-24, -24, 24, -24, 24, 24, -24, 24)
 
-[node name="PillarC" type="StaticBody2D" parent="Pillars" unique_id=826626976]
+[node name="PillarC" type="StaticBody2D" parent="Pillars"]
 position = Vector2(20, -150)
+collision_layer = 1
 collision_mask = 0
-metadata/_edit_group_ = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Pillars/PillarC" unique_id=1676700052]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Pillars/PillarC"]
 shape = SubResource("RectangleShape2D_pillar")
 
-[node name="Visual" type="Polygon2D" parent="Pillars/PillarC" unique_id=1341455974]
+[node name="Visual" type="Polygon2D" parent="Pillars/PillarC"]
 color = Color(0.45, 0.42, 0.52, 1)
 polygon = PackedVector2Array(-24, -24, 24, -24, 24, 24, -24, 24)
 
-[node name="Dummies" type="Node2D" parent="." unique_id=1655598197]
+[node name="Dummies" type="Node2D" parent="."]
 
-[node name="DummyA" parent="Dummies" unique_id=1438097850 instance=ExtResource("3_dummy")]
+[node name="DummyA" parent="Dummies" instance=ExtResource("3_dummy")]
 position = Vector2(300, -120)
 
-[node name="DummyB" parent="Dummies" unique_id=2058116598 instance=ExtResource("3_dummy")]
-position = Vector2(305, -2)
+[node name="DummyB" parent="Dummies" instance=ExtResource("3_dummy")]
+position = Vector2(300, 0)
 
-[node name="DummyC" parent="Dummies" unique_id=656297188 instance=ExtResource("3_dummy")]
+[node name="DummyC" parent="Dummies" instance=ExtResource("3_dummy")]
 position = Vector2(300, 120)
 
-[node name="DummyD" parent="Dummies" unique_id=1396992369 instance=ExtResource("3_dummy")]
-position = Vector2(295, 224)
+[node name="Enemies" type="Node2D" parent="."]
 
-[node name="Player" parent="." unique_id=649248426 instance=ExtResource("2_player")]
+[node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector2(-300, 0)
 
-[node name="HUD" parent="." unique_id=177190077 instance=ExtResource("4_hud")]
+[node name="HUD" parent="." instance=ExtResource("4_hud")]
 
-[node name="DebugLayer" type="CanvasLayer" parent="." unique_id=1211844046]
+[node name="DebugLayer" type="CanvasLayer" parent="."]
 
-[node name="DebugLabel" type="Label" parent="DebugLayer" unique_id=245985058]
+[node name="DebugLabel" type="Label" parent="DebugLayer"]
 offset_left = 12.0
 offset_top = 10.0
 offset_right = 520.0
