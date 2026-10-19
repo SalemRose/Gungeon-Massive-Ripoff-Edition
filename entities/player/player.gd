@@ -19,6 +19,7 @@ extends CharacterBody2D
 
 signal health_changed(current: int, maximum: int)
 signal rolled(direction: Vector2)
+signal blanks_changed(current: int, maximum: int)
 signal died
 
 enum State { NORMAL, ROLLING, DEAD }
@@ -40,6 +41,18 @@ enum State { NORMAL, ROLLING, DEAD }
 ## A dodge pressed up to this long BEFORE it becomes possible still fires.
 ## Makes chained rolls feel responsive instead of "eaten".
 @export var roll_buffer_time: float = 0.12
+
+@export_group("Blank")
+@export var starting_blanks: int = 2
+@export var max_blanks: int = 5
+## Bullets inside this distance are destroyed (about one screen).
+@export var blank_radius: float = 420.0
+## Enemy push speed at the player's feet (weaker farther away).
+@export var blank_knockback: float = 320.0
+## Invincibility right after a blank, so it can save you from a point-blank hit.
+@export var blank_iframes: float = 0.4
+## Stops a double-tap from burning two blanks.
+@export var blank_cooldown: float = 0.35
 
 @export_group("Aiming")
 ## 0 = camera stays on the player, 1 = camera sits on the cursor.
@@ -68,6 +81,9 @@ var _roll_time: float = 0.0
 var _roll_cooldown_left: float = 0.0
 var _roll_buffer_left: float = 0.0
 var _hurt_iframes_left: float = 0.0
+var blanks: int
+var _blank_iframes_left: float = 0.0
+var _blank_cooldown_left: float = 0.0
 var _camera_lean: Vector2 = Vector2.ZERO
 var _shake: float = 0.0
 var _flash_left: float = 0.0
@@ -83,6 +99,8 @@ func _ready() -> void:
 	add_to_group("player")  # lets enemies find us: get_tree().get_first_node_in_group("player")
 	health = max_health
 	health_changed.emit(health, max_health)
+	blanks = mini(starting_blanks, max_blanks)
+	blanks_changed.emit(blanks, max_blanks)
 
 
 ## _input sees every raw event. We only use it to detect WHICH device the
@@ -122,9 +140,13 @@ func _tick_timers(delta: float) -> void:
 	_roll_cooldown_left = maxf(0.0, _roll_cooldown_left - delta)
 	_roll_buffer_left = maxf(0.0, _roll_buffer_left - delta)
 	_hurt_iframes_left = maxf(0.0, _hurt_iframes_left - delta)
+	_blank_iframes_left = maxf(0.0, _blank_iframes_left - delta)
+	_blank_cooldown_left = maxf(0.0, _blank_cooldown_left - delta)
 
 	if Input.is_action_just_pressed("dodge"):
 		_roll_buffer_left = roll_buffer_time
+	if Input.is_action_just_pressed("blank"):
+		use_blank()
 
 
 func _update_aim() -> void:
@@ -220,7 +242,7 @@ func _update_visuals() -> void:
 
 func is_invincible() -> bool:
 	var rolling_protected := state == State.ROLLING and _roll_time < roll_iframes
-	return rolling_protected or _hurt_iframes_left > 0.0 or state == State.DEAD
+	return rolling_protected or _hurt_iframes_left > 0.0 or _blank_iframes_left > 0.0 or state == State.DEAD
 
 
 ## Called by enemy bullets and hazards. Damage is in half-hearts; fractions
@@ -237,6 +259,30 @@ func take_damage(amount: float) -> bool:
 		state = State.DEAD
 		died.emit()
 	return true
+
+
+## Spends one blank: destroys nearby enemy bullets, pushes enemies back and
+## grants a moment of invincibility. Works mid-roll. Returns false if there is
+## no blank to spend (or we are dead / still in the double-tap cooldown).
+func use_blank() -> bool:
+	if blanks <= 0 or state == State.DEAD or _blank_cooldown_left > 0.0:
+		return false
+	blanks -= 1
+	_blank_cooldown_left = blank_cooldown
+	_blank_iframes_left = blank_iframes
+	BlankEffect.fire(get_parent(), global_position, blank_radius, blank_knockback)
+	add_shake(4.0)
+	blanks_changed.emit(blanks, max_blanks)
+	return true
+
+
+## For pickups and shops. Returns how many were actually added (the player
+## can't carry more than max_blanks).
+func add_blanks(amount: int) -> int:
+	var before := blanks
+	blanks = clampi(blanks + amount, 0, max_blanks)
+	blanks_changed.emit(blanks, max_blanks)
+	return blanks - before
 
 
 func heal(amount: int) -> void:
@@ -265,10 +311,11 @@ func set_gun_color(color: Color) -> void:
 
 ## One-line status used by the test room's debug label.
 func debug_text() -> String:
-	return "state: %s\nhealth: %d/%d\ninvincible: %s\ninput: %s" % [
+	return "state: %s\nhealth: %d/%d  blanks: %d\ninvincible: %s\ninput: %s" % [
 		State.keys()[state],
 		health,
 		max_health,
+		blanks,
 		str(is_invincible()),
 		"gamepad" if using_gamepad else "mouse + keyboard",
 	]

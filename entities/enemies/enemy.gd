@@ -82,6 +82,7 @@ var _base_scale: Vector2 = Vector2.ONE
 
 
 func _ready() -> void:
+	add_to_group("enemies")  # lets blanks and other effects find every enemy
 	health = max_health
 	_base_scale = visual.scale
 	if auto_activate:
@@ -144,6 +145,17 @@ func take_damage(amount: float) -> bool:
 
 func is_alive() -> bool:
 	return state != State.DEAD
+
+
+## Shoves the enemy (blanks, explosions...). It is a one-off speed boost that
+## the normal movement then slows back down, so it feels like a push.
+## Turrets don't move, and enemies that are not fighting yet are ignored.
+func apply_knockback(direction: Vector2, strength: float) -> void:
+	if movement == Movement.STATIONARY:
+		return
+	if state == State.DORMANT or state == State.SPAWNING or state == State.DEAD:
+		return
+	velocity = direction.normalized() * strength
 
 
 # --- Spawning and dying ---------------------------------------------------------

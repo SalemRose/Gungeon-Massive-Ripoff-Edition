@@ -315,8 +315,11 @@ func _spawn_wave(wave: RoomWave) -> void:
 			push_warning("Room %s: wave %d contains a scene that is not an Enemy" % [name, wave_index])
 			continue
 		enemy.auto_activate = false  # the room wakes it up
+		# Position BEFORE adding to the tree: an enemy added first sits at the
+		# container's origin for a moment, and if the player is standing there
+		# the physics engine would shove the player out of the way.
+		enemy.position = _enemy_root.to_local(spots[i])
 		_enemy_root.add_child(enemy)
-		enemy.global_position = spots[i]
 		_alive[enemy.get_instance_id()] = enemy
 		# Count it as gone when it dies OR when it is removed in any other way
 		# (so a room can never get stuck waiting for a freed enemy).

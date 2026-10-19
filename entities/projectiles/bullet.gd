@@ -31,6 +31,8 @@ extends Node2D
 
 ## Physics layer bit for walls and other solid level geometry.
 const WORLD_MASK := 1
+## Physics layer bit of the player.
+const PLAYER_MASK := 2
 
 var direction: Vector2 = Vector2.RIGHT
 
@@ -43,8 +45,27 @@ var _ignored: Array[RID] = []
 
 
 func _ready() -> void:
+	add_to_group("bullets")  # lets blanks and other effects find every bullet
 	visual.modulate = color
 	rotation = direction.angle()
+
+
+## True if this bullet can hurt the player (an enemy bullet).
+func is_hostile() -> bool:
+	return (hit_mask & PLAYER_MASK) != 0
+
+
+## Removes the bullet with a quick pop instead of vanishing. It stops moving and
+## stops hurting immediately; only the little animation is left.
+func destroy() -> void:
+	if is_queued_for_deletion() or not is_physics_processing():
+		return
+	set_physics_process(false)
+	remove_from_group("bullets")
+	var tween := create_tween().set_parallel(true)
+	tween.tween_property(visual, "scale", Vector2(2.2, 2.2), 0.12)
+	tween.tween_property(visual, "modulate:a", 0.0, 0.12)
+	tween.chain().tween_callback(queue_free)
 
 
 func _physics_process(delta: float) -> void:

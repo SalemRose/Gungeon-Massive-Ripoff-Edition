@@ -54,6 +54,16 @@ offset_bottom = 78.0
 theme_override_font_sizes/font_size = 26
 text = "0 / 0"
 
+[node name="BlankLabel" type="Label" parent="Root"]
+layout_mode = 0
+offset_left = 168.0
+offset_top = 24.0
+offset_right = 264.0
+offset_bottom = 47.0
+theme_override_colors/font_color = Color(0.6, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "Blanks: 2"
+
 [node name="ReloadBar" type="ProgressBar" parent="Root"]
 visible = false
 layout_mode = 0

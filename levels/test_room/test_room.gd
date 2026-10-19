@@ -52,8 +52,8 @@ func _spawn_enemies() -> void:
 		old.queue_free()
 	for spawn in ENEMY_SPAWNS:
 		var enemy := (spawn["scene"] as PackedScene).instantiate() as Enemy
+		enemy.position = enemies.to_local(spawn["position"])  # before add_child, see Room._spawn_wave
 		enemies.add_child(enemy)
-		enemy.global_position = spawn["position"]
 
 
 ## Draws the floor and a grid so movement is easy to see. Parents draw before
