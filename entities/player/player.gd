@@ -468,6 +468,14 @@ func add_blanks(amount: int) -> int:
 	return blanks - before
 
 
+## A heart container: raises the maximum (in half-hearts, so 2 = one heart)
+## and heals by the same amount. Lasts for the run.
+func add_max_health(amount: int) -> void:
+	max_health += amount
+	health = mini(max_health, health + amount)
+	health_changed.emit(health, max_health)
+
+
 func add_coins(amount: int) -> void:
 	coins = maxi(0, coins + amount)
 	coins_changed.emit(coins)

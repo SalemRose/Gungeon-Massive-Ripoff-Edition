@@ -41,6 +41,7 @@ const ENEMY_POOL: Array[String] = [
 ]
 const PILLAR_SCENE: PackedScene = preload("res://levels/rooms/pillar.tscn")
 const TABLE_SCENE: PackedScene = preload("res://levels/props/table.tscn")
+const CHEST_SCENE: PackedScene = preload("res://levels/props/chest.tscn")
 const SHOP_ITEM_SCENE: PackedScene = preload("res://levels/props/shop_item.tscn")
 ## What the shop sells: [pickup kind, price]. Left to right on the pedestals.
 const SHOP_STOCK := [
@@ -102,6 +103,8 @@ func _build_room(cell: FloorLayout.Cell, rng: RandomNumberGenerator) -> void:
 		_add_props(room, rng)
 	elif cell.type == FloorLayout.RoomType.SHOP:
 		_add_shop_stock(room)
+	elif cell.type == FloorLayout.RoomType.TREASURE:
+		_add_chest(room, rng)
 	rooms[cell.grid_pos] = room
 
 
@@ -126,6 +129,18 @@ func _add_shop_stock(room: Room) -> void:
 		item.price = SHOP_STOCK[i][1]
 		item.position = Vector2((i - (SHOP_STOCK.size() - 1) * 0.5) * 80.0, -45.0)
 		room.add_child(item)
+
+
+## One chest above the room's middle line. Loot is rolled now (seeded), not
+## when it is opened, so a seed always has the same treasure.
+func _add_chest(room: Room, rng: RandomNumberGenerator) -> void:
+	var chest := CHEST_SCENE.instantiate() as Chest
+	if rng.randf() < 0.5:
+		chest.contents = [[Pickup.Kind.HEART_CONTAINER, 1]]
+	else:
+		chest.contents = [[Pickup.Kind.BLANK, 1], [Pickup.Kind.AMMO, 1], [Pickup.Kind.COIN, 8]]
+	chest.position = Vector2(0.0, -40.0)
+	room.add_child(chest)
 
 
 func _add_props(room: Room, rng: RandomNumberGenerator) -> void:
