@@ -7,7 +7,7 @@ radius = 9.0
 
 [node name="Enemy" type="CharacterBody2D"]
 collision_layer = 4
-collision_mask = 7
+collision_mask = 135
 motion_mode = 1
 script = ExtResource("1_enemy")
 

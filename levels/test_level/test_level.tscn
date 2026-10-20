@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://levels/test_level/test_level.gd" id="1_level"]
 [ext_resource type="Script" path="res://levels/rooms/room.gd" id="2_room"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" path="res://entities/enemies/ring_turret.tscn" id="8_ring"]
 [ext_resource type="PackedScene" path="res://entities/enemies/spiral_mage.tscn" id="9_mage"]
 [ext_resource type="PackedScene" path="res://levels/rooms/pillar.tscn" id="10_pillar"]
+[ext_resource type="PackedScene" path="res://levels/props/table.tscn" id="11_table"]
 
 [sub_resource type="Resource" id="RoomWave_ArenaA_1"]
 script = ExtResource("3_wave")
@@ -67,6 +68,12 @@ position = Vector2(-90, 60)
 
 [node name="Pillar4" parent="Rooms/ArenaA" instance=ExtResource("10_pillar")]
 position = Vector2(90, 60)
+
+[node name="Table1" parent="Rooms/ArenaA" instance=ExtResource("11_table")]
+position = Vector2(-150, -110)
+
+[node name="Table2" parent="Rooms/ArenaA" instance=ExtResource("11_table")]
+position = Vector2(150, 110)
 
 [node name="ArenaB" type="Node2D" parent="Rooms"]
 position = Vector2(944, 0)

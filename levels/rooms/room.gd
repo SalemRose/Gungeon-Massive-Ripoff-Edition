@@ -39,6 +39,9 @@ const DOOR_SCENE: PackedScene = preload("res://levels/rooms/door.tscn")
 ## Physics layer masks: 1 = world, 2 = player.
 const WORLD_MASK := 1
 const PLAYER_MASK := 2
+## Everything an enemy must not spawn inside: walls, pillars (layer 1) and
+## tables (layer 8).
+const OBSTACLE_MASK := 1 | 128
 
 @export_group("Shape")
 ## Size of the floor in pixels (walls are built outside of it).
@@ -402,7 +405,7 @@ func _is_spot_free(spot: Vector2) -> bool:
 	var query := PhysicsShapeQueryParameters2D.new()
 	query.shape = circle
 	query.transform = Transform2D(0.0, spot)
-	query.collision_mask = WORLD_MASK
+	query.collision_mask = OBSTACLE_MASK
 	return get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty()
 
 

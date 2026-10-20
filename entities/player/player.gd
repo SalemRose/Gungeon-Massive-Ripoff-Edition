@@ -54,6 +54,10 @@ enum State { NORMAL, ROLLING, DEAD }
 ## Stops a double-tap from burning two blanks.
 @export var blank_cooldown: float = 0.35
 
+@export_group("Interaction")
+## How close something must be to use it with the Interact button.
+@export var interact_range: float = 44.0
+
 @export_group("Aiming")
 ## 0 = camera stays on the player, 1 = camera sits on the cursor.
 @export_range(0.0, 1.0) var camera_lean: float = 0.25
@@ -147,6 +151,8 @@ func _tick_timers(delta: float) -> void:
 		_roll_buffer_left = roll_buffer_time
 	if Input.is_action_just_pressed("blank"):
 		use_blank()
+	if Input.is_action_just_pressed("interact") and state == State.NORMAL:
+		try_interact()
 
 
 func _update_aim() -> void:
@@ -258,6 +264,27 @@ func take_damage(amount: float) -> bool:
 	if health == 0:
 		state = State.DEAD
 		died.emit()
+	return true
+
+
+## Uses the closest thing in range that can be used (flip a table, open a
+## chest, take stairs...). Anything usable joins the "interactables" group and
+## provides can_interact(player) and interact(player). Returns true if
+## something was used.
+func try_interact() -> bool:
+	var best: Node2D = null
+	var best_distance := interact_range
+	for node in get_tree().get_nodes_in_group("interactables"):
+		var candidate := node as Node2D
+		if candidate == null or not candidate.has_method("can_interact") or not candidate.can_interact(self):
+			continue
+		var distance := global_position.distance_to(candidate.global_position)
+		if distance <= best_distance:
+			best_distance = distance
+			best = candidate
+	if best == null:
+		return false
+	best.interact(self)
 	return true
 
 

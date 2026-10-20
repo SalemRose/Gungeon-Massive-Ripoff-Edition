@@ -4,7 +4,7 @@
 
 [node name="EnemyBullet" type="Node2D"]
 script = ExtResource("1_bullet")
-hit_mask = 3
+hit_mask = 259
 
 [node name="Visual" type="Polygon2D" parent="."]
 polygon = PackedVector2Array(4, 0, 2.83, 2.83, 0, 4, -2.83, 2.83, -4, 0, -2.83, -2.83, 0, -4, 2.83, -2.83)

@@ -34,8 +34,9 @@ enum Movement {
 	KEEP_DISTANCE,  ## holds preferred_distance: backs off if close, strafes when in range
 }
 
-## Physics layer bits: 1 = world, 2 = player. Enemy bullets hit both.
-const BULLET_HIT_MASK := 1 | 2
+## Physics layer bits: 1 = world, 2 = player, 256 = cover (flipped tables).
+## Enemy bullets hit all three.
+const BULLET_HIT_MASK := 1 | 2 | 256
 const WORLD_MASK := 1
 
 @export_group("Stats")
