@@ -134,6 +134,9 @@ var _melee_direction: Vector2 = Vector2.RIGHT
 var _blank_iframes_left: float = 0.0
 var _blank_cooldown_left: float = 0.0
 var _camera_lean: Vector2 = Vector2.ZERO
+## Optional hook (set by RoomCamera): takes the lean offset and returns a copy
+## that keeps the view inside the current room. Shake is added after it.
+var camera_lean_limiter: Callable = Callable()
 var _shake: float = 0.0
 var _flash_left: float = 0.0
 
@@ -361,7 +364,10 @@ func _update_camera(delta: float) -> void:
 
 	# Shake is added on top of the lean, then fades out.
 	var shake_offset := Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * _shake
-	camera.offset = _camera_lean + shake_offset
+	var lean := _camera_lean
+	if camera_lean_limiter.is_valid():
+		lean = camera_lean_limiter.call(lean)
+	camera.offset = lean + shake_offset
 	_shake = move_toward(_shake, 0.0, shake_decay * delta)
 
 

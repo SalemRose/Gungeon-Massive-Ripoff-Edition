@@ -13,6 +13,7 @@ extends Node2D
 @onready var debug_label: Label = $DebugLayer/DebugLabel
 
 var builder: FloorBuilder
+var room_camera: RoomCamera
 var layout: FloorLayout
 var _show_map: bool = true
 
@@ -28,6 +29,10 @@ func _ready() -> void:
 	# Place the player at the start room's center (it is already in the tree).
 	player.global_position = builder.start_room().global_position
 	player.died.connect(_on_player_died)
+	# Holds the camera inside the current room (see room_camera.gd).
+	room_camera = RoomCamera.new()
+	add_child(room_camera)
+	room_camera.setup(player)
 
 
 func _process(_delta: float) -> void:
