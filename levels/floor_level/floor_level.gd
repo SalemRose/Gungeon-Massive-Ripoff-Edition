@@ -26,6 +26,9 @@ func _ready() -> void:
 	builder = FloorBuilder.new()
 	builder.name = "Floor"
 	add_child(builder)
+	# Draw order follows tree order: the floor must come BEFORE the player or
+	# the room floors are painted on top of the player and hide them.
+	move_child(builder, 0)
 	builder.build(layout)
 	# Place the player at the start room's center (it is already in the tree).
 	player.global_position = builder.start_room().global_position
