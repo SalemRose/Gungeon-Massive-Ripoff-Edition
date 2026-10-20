@@ -20,9 +20,19 @@ extends CharacterBody2D
 signal health_changed(current: int, maximum: int)
 signal rolled(direction: Vector2)
 signal blanks_changed(current: int, maximum: int)
+## A melee swing began, aimed along `direction`.
+signal melee_swung(direction: Vector2)
 signal died
 
-enum State { NORMAL, ROLLING, DEAD }
+## Physics layer masks: 1 = world, 4 = enemy.
+const WORLD_MASK := 1
+const ENEMY_MASK := 4
+## Targets have a size, so the swing also catches bodies slightly outside its
+## nominal arc (their centre can be off to the side while their edge is inside).
+const MELEE_BODY_PADDING_DEGREES := 20.0
+
+## MELEE is added last so the older states keep their numbers.
+enum State { NORMAL, ROLLING, DEAD, MELEE }
 
 @export_group("Movement")
 @export var move_speed: float = 170.0
@@ -53,6 +63,25 @@ enum State { NORMAL, ROLLING, DEAD }
 @export var blank_iframes: float = 0.4
 ## Stops a double-tap from burning two blanks.
 @export var blank_cooldown: float = 0.35
+
+@export_group("Melee")
+## Melee is a LAST RESORT: short reach, low damage, long cooldown, and you
+## can't shoot or roll while swinging. A pistol out-damages it many times over.
+@export var melee_damage: float = 4.0
+## Reach from the player's centre to the EDGE of a target's body, in pixels.
+@export var melee_range: float = 38.0
+## Width of the swing in degrees (centered on the aim).
+@export var melee_arc_degrees: float = 130.0
+## How long the swing lasts (you are locked out of shooting and rolling).
+@export var melee_duration: float = 0.25
+## When, inside the swing, the hit lands.
+@export var melee_hit_time: float = 0.08
+## Wait after a swing ends before the next one.
+@export var melee_cooldown: float = 0.8
+## Push given to a moving enemy that gets hit.
+@export var melee_knockback: float = 220.0
+## Walking speed during the swing, as a fraction of normal.
+@export_range(0.0, 1.0) var melee_move_factor: float = 0.35
 
 @export_group("Interaction")
 ## How close something must be to use it with the Interact button.
@@ -86,6 +115,10 @@ var _roll_cooldown_left: float = 0.0
 var _roll_buffer_left: float = 0.0
 var _hurt_iframes_left: float = 0.0
 var blanks: int
+var _melee_time: float = 0.0
+var _melee_cooldown_left: float = 0.0
+var _melee_hit_done: bool = false
+var _melee_direction: Vector2 = Vector2.RIGHT
 var _blank_iframes_left: float = 0.0
 var _blank_cooldown_left: float = 0.0
 var _camera_lean: Vector2 = Vector2.ZERO
@@ -130,6 +163,8 @@ func _physics_process(delta: float) -> void:
 			_process_normal(delta)
 		State.ROLLING:
 			_process_rolling(delta)
+		State.MELEE:
+			_process_melee(delta)
 		State.DEAD:
 			velocity = velocity.move_toward(Vector2.ZERO, friction * delta)
 
@@ -146,6 +181,7 @@ func _tick_timers(delta: float) -> void:
 	_hurt_iframes_left = maxf(0.0, _hurt_iframes_left - delta)
 	_blank_iframes_left = maxf(0.0, _blank_iframes_left - delta)
 	_blank_cooldown_left = maxf(0.0, _blank_cooldown_left - delta)
+	_melee_cooldown_left = maxf(0.0, _melee_cooldown_left - delta)
 
 	if Input.is_action_just_pressed("dodge"):
 		_roll_buffer_left = roll_buffer_time
@@ -153,6 +189,8 @@ func _tick_timers(delta: float) -> void:
 		use_blank()
 	if Input.is_action_just_pressed("interact") and state == State.NORMAL:
 		try_interact()
+	if Input.is_action_just_pressed("melee"):
+		start_melee()
 
 
 func _update_aim() -> void:
@@ -180,6 +218,71 @@ func _process_normal(delta: float) -> void:
 
 	if _roll_buffer_left > 0.0 and _roll_cooldown_left <= 0.0:
 		_start_roll(input)
+
+
+## Begins a melee swing toward the current aim. Only possible when walking
+## around normally (not rolling, dead or already swinging) and off cooldown.
+## Returns true if the swing started.
+func start_melee() -> bool:
+	if state != State.NORMAL or _melee_cooldown_left > 0.0:
+		return false
+	state = State.MELEE
+	_melee_time = 0.0
+	_melee_hit_done = false
+	_melee_direction = aim_direction
+	MeleeSwingEffect.play(self, melee_range, melee_arc_degrees, melee_duration, _melee_direction)
+	melee_swung.emit(_melee_direction)
+	return true
+
+
+func _process_melee(delta: float) -> void:
+	_melee_time += delta
+	# You can shuffle during the swing, but slowly.
+	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	velocity = velocity.move_toward(input * move_speed * melee_move_factor, acceleration * delta)
+
+	if not _melee_hit_done and _melee_time >= melee_hit_time:
+		_melee_hit_done = true
+		_melee_hit()
+	if _melee_time >= melee_duration:
+		state = State.NORMAL
+		_melee_cooldown_left = melee_cooldown
+
+
+## Damages everything with a take_damage() method inside the swing's reach and
+## arc, once each. Walls (and shut doors) block it. Returns how many were hit.
+func _melee_hit() -> int:
+	var circle := CircleShape2D.new()
+	circle.radius = melee_range
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = circle
+	query.transform = Transform2D(0.0, global_position)
+	query.collision_mask = ENEMY_MASK
+	var found := get_world_2d().direct_space_state.intersect_shape(query, 32)
+
+	var half_arc := deg_to_rad(melee_arc_degrees) * 0.5 + deg_to_rad(MELEE_BODY_PADDING_DEGREES)
+	var already_hit := {}
+	var hits := 0
+	for result in found:
+		var target := result.collider as Node2D
+		if target == null or already_hit.has(target.get_instance_id()) or not target.has_method("take_damage"):
+			continue
+		already_hit[target.get_instance_id()] = true
+
+		var to_target := target.global_position - global_position
+		if absf(angle_difference(_melee_direction.angle(), to_target.angle())) > half_arc:
+			continue
+		var wall_query := PhysicsRayQueryParameters2D.create(global_position, target.global_position, WORLD_MASK)
+		if not get_world_2d().direct_space_state.intersect_ray(wall_query).is_empty():
+			continue  # a wall is in the way
+
+		if target.take_damage(melee_damage):
+			hits += 1
+			if target.has_method("apply_knockback"):
+				target.apply_knockback(to_target.normalized(), melee_knockback)
+	if hits > 0:
+		add_shake(3.0)
+	return hits
 
 
 func _start_roll(move_input: Vector2) -> void:
