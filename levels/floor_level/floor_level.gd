@@ -14,6 +14,7 @@ extends Node2D
 
 var builder: FloorBuilder
 var room_camera: RoomCamera
+var minimap: Minimap
 var layout: FloorLayout
 var _show_map: bool = true
 
@@ -33,6 +34,13 @@ func _ready() -> void:
 	room_camera = RoomCamera.new()
 	add_child(room_camera)
 	room_camera.setup(player)
+	# Minimap in the top-right corner, on its own canvas layer.
+	var map_layer := CanvasLayer.new()
+	add_child(map_layer)
+	minimap = Minimap.new()
+	map_layer.add_child(minimap)
+	minimap.setup(layout, room_camera)
+	minimap.position = Vector2(get_viewport().get_visible_rect().size.x - minimap.size.x - 12.0, 12.0)
 
 
 func _process(_delta: float) -> void:

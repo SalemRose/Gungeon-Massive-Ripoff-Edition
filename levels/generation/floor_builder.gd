@@ -86,6 +86,7 @@ func _build_room(cell: FloorLayout.Cell, rng: RandomNumberGenerator) -> void:
 	room.floor_color = ROOM_COLORS[cell.type]
 	room.position = cell_to_world(cell.grid_pos)   # position BEFORE add_child
 	room.set_meta("room_type", cell.type)
+	room.set_meta("grid_pos", cell.grid_pos)   # the minimap maps Room -> cell with this
 	if cell.type == FloorLayout.RoomType.COMBAT:
 		room.waves = _make_waves(rng)
 	add_child(room)
