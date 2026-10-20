@@ -33,6 +33,8 @@ extends Node2D
 const WORLD_MASK := 1
 ## Physics layer bit of the player.
 const PLAYER_MASK := 2
+## Physics layer bit of enemies.
+const ENEMY_MASK := 4
 
 var direction: Vector2 = Vector2.RIGHT
 
@@ -53,6 +55,26 @@ func _ready() -> void:
 ## True if this bullet can hurt the player (an enemy bullet).
 func is_hostile() -> bool:
 	return (hit_mask & PLAYER_MASK) != 0
+
+
+## Turns an enemy bullet into the player's: it flies off in `new_direction`,
+## now hurts enemies (and walls) instead of the player, and lives a fresh
+## lifetime. Used by the melee swing. Safe to call on any bullet.
+func deflect(new_direction: Vector2, new_damage: float, speed_multiplier: float, new_color: Color) -> void:
+	direction = new_direction.normalized()
+	rotation = direction.angle()
+	hit_mask = WORLD_MASK | ENEMY_MASK
+	damage = new_damage
+	speed *= speed_multiplier
+	bounces = 0
+	pierce = 0
+	_age = 0.0
+	_ignored.clear()
+	color = new_color
+	visual.modulate = new_color
+	# A little pop so the player sees it happen.
+	visual.scale = Vector2(2.0, 2.0)
+	create_tween().tween_property(visual, "scale", Vector2.ONE, 0.12)
 
 
 ## Removes the bullet with a quick pop instead of vanishing. It stops moving and

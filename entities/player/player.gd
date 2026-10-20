@@ -22,6 +22,8 @@ signal rolled(direction: Vector2)
 signal blanks_changed(current: int, maximum: int)
 ## A melee swing began, aimed along `direction`.
 signal melee_swung(direction: Vector2)
+## The swing knocked `count` enemy bullets back at their owners.
+signal bullets_deflected(count: int)
 signal died
 
 ## Physics layer masks: 1 = world, 4 = enemy.
@@ -30,6 +32,10 @@ const ENEMY_MASK := 4
 ## Targets have a size, so the swing also catches bodies slightly outside its
 ## nominal arc (their centre can be off to the side while their edge is inside).
 const MELEE_BODY_PADDING_DEGREES := 20.0
+## Bullets are points, so they need less padding, but they also fly in from a
+## little beyond the nominal reach.
+const DEFLECT_PADDING_DEGREES := 10.0
+const DEFLECT_EXTRA_REACH := 14.0
 
 ## MELEE is added last so the older states keep their numbers.
 enum State { NORMAL, ROLLING, DEAD, MELEE }
@@ -82,6 +88,11 @@ enum State { NORMAL, ROLLING, DEAD, MELEE }
 @export var melee_knockback: float = 220.0
 ## Walking speed during the swing, as a fraction of normal.
 @export_range(0.0, 1.0) var melee_move_factor: float = 0.35
+## While the swing is active it also knocks enemy bullets in its arc back along
+## your aim. Deflected bullets hurt enemies instead of you.
+@export var melee_deflect_damage: float = 5.0
+@export var melee_deflect_speed_factor: float = 1.3
+@export var melee_deflect_color: Color = Color(0.6, 1.0, 1.0)
 
 @export_group("Interaction")
 ## How close something must be to use it with the Interact button.
@@ -118,6 +129,7 @@ var blanks: int
 var _melee_time: float = 0.0
 var _melee_cooldown_left: float = 0.0
 var _melee_hit_done: bool = false
+var _deflect_text_shown: bool = false
 var _melee_direction: Vector2 = Vector2.RIGHT
 var _blank_iframes_left: float = 0.0
 var _blank_cooldown_left: float = 0.0
@@ -229,6 +241,7 @@ func start_melee() -> bool:
 	state = State.MELEE
 	_melee_time = 0.0
 	_melee_hit_done = false
+	_deflect_text_shown = false
 	_melee_direction = aim_direction
 	MeleeSwingEffect.play(self, melee_range, melee_arc_degrees, melee_duration, _melee_direction)
 	melee_swung.emit(_melee_direction)
@@ -244,6 +257,8 @@ func _process_melee(delta: float) -> void:
 	if not _melee_hit_done and _melee_time >= melee_hit_time:
 		_melee_hit_done = true
 		_melee_hit()
+	if _melee_time >= melee_hit_time:
+		_melee_deflect()  # from the moment the blade is out until the swing ends
 	if _melee_time >= melee_duration:
 		state = State.NORMAL
 		_melee_cooldown_left = melee_cooldown
@@ -283,6 +298,33 @@ func _melee_hit() -> int:
 	if hits > 0:
 		add_shake(3.0)
 	return hits
+
+
+## Knocks every enemy bullet inside the swing's reach and arc back along the
+## aim. Runs every frame of the active swing, so a bullet that arrives late in
+## the swing is still caught. Returns how many were deflected this frame.
+func _melee_deflect() -> int:
+	var half_arc := deg_to_rad(melee_arc_degrees) * 0.5 + deg_to_rad(DEFLECT_PADDING_DEGREES)
+	var reach := melee_range + DEFLECT_EXTRA_REACH
+	var count := 0
+	for node in get_tree().get_nodes_in_group("bullets"):
+		var bullet := node as Bullet
+		if bullet == null or not bullet.is_hostile():
+			continue
+		var offset := bullet.global_position - global_position
+		if offset.length() > reach:
+			continue
+		if absf(angle_difference(_melee_direction.angle(), offset.angle())) > half_arc:
+			continue
+		bullet.deflect(_melee_direction, melee_deflect_damage, melee_deflect_speed_factor, melee_deflect_color)
+		count += 1
+	if count > 0:
+		add_shake(2.0)
+		if not _deflect_text_shown:
+			_deflect_text_shown = true
+			FloatingText.spawn(get_parent(), global_position + Vector2(0.0, -26.0), "DEFLECT", melee_deflect_color, 11)
+		bullets_deflected.emit(count)
+	return count
 
 
 func _start_roll(move_input: Vector2) -> void:
