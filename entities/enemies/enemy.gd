@@ -52,6 +52,10 @@ const WAYPOINT_REACHED := 10.0
 @export_group("Movement")
 @export var movement: Movement = Movement.APPROACH
 @export var move_speed: float = 55.0
+@export_group("Drops")
+## Scales the chance of dropping a pickup when killed (0 = never, 2 = double).
+@export var drop_luck: float = 1.0
+@export_group("Movement")
 @export var acceleration: float = 500.0
 @export var preferred_distance: float = 170.0
 ## Dead zone around preferred_distance where a KEEP_DISTANCE enemy strafes.
@@ -178,11 +182,22 @@ func _finish_spawning() -> void:
 	_strafe_left = 0.0
 
 
+## Maybe leaves a pickup where we fell, in the room (so it outlives us).
+func _drop_loot() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	var kind := Pickup.roll_drop(rng, drop_luck)
+	if kind >= 0:
+		var holder: Node = _room if _room != null else get_parent()
+		Pickup.spawn(holder, global_position, kind)
+
+
 func _die() -> void:
 	state = State.DEAD
 	velocity = Vector2.ZERO
 	collision_layer = 0  # bullets and the player no longer touch it
 	collision_mask = 0
+	_drop_loot()
 	died.emit(self)
 	var tween := create_tween()
 	tween.tween_property(visual, "scale", Vector2.ZERO, 0.15)
