@@ -145,5 +145,8 @@ func _build_corridors(cell: FloorLayout.Cell) -> void:
 		corridor.length = span - from_edge - to_edge
 		var along := Vector2.RIGHT if horizontal else Vector2.DOWN
 		corridor.position = a.position + along * (from_edge + corridor.length * 0.5)
+		# Draw UNDER the rooms: the corridor floor overlaps the doorway and
+		# would otherwise paint over the door (later siblings draw on top).
+		corridor.z_index = -1
 		add_child(corridor)
 		corridors.append(corridor)
