@@ -41,6 +41,13 @@ const ENEMY_POOL: Array[String] = [
 ]
 const PILLAR_SCENE: PackedScene = preload("res://levels/rooms/pillar.tscn")
 const TABLE_SCENE: PackedScene = preload("res://levels/props/table.tscn")
+const SHOP_ITEM_SCENE: PackedScene = preload("res://levels/props/shop_item.tscn")
+## What the shop sells: [pickup kind, price]. Left to right on the pedestals.
+const SHOP_STOCK := [
+	[Pickup.Kind.HEART, 12],
+	[Pickup.Kind.AMMO, 15],
+	[Pickup.Kind.BLANK, 20],
+]
 ## Prop spots, all clear of the door lines through the room's middle.
 const PILLAR_SPOTS := [Vector2(-90, -60), Vector2(90, -60), Vector2(-90, 60), Vector2(90, 60)]
 const TABLE_SPOTS := [Vector2(-150, -110), Vector2(150, -110), Vector2(-150, 110), Vector2(150, 110)]
@@ -93,6 +100,8 @@ func _build_room(cell: FloorLayout.Cell, rng: RandomNumberGenerator) -> void:
 	# Props go in after add_child: they are just children on the world layer.
 	if cell.type == FloorLayout.RoomType.COMBAT:
 		_add_props(room, rng)
+	elif cell.type == FloorLayout.RoomType.SHOP:
+		_add_shop_stock(room)
 	rooms[cell.grid_pos] = room
 
 
@@ -107,6 +116,16 @@ func _make_waves(rng: RandomNumberGenerator) -> Array[RoomWave]:
 		wave.delay = 1.0
 		waves.append(wave)
 	return waves
+
+
+## Pedestals in a row above the room's middle line, clear of the doorways.
+func _add_shop_stock(room: Room) -> void:
+	for i in SHOP_STOCK.size():
+		var item := SHOP_ITEM_SCENE.instantiate() as ShopItem
+		item.kind = SHOP_STOCK[i][0]
+		item.price = SHOP_STOCK[i][1]
+		item.position = Vector2((i - (SHOP_STOCK.size() - 1) * 0.5) * 80.0, -45.0)
+		room.add_child(item)
 
 
 func _add_props(room: Room, rng: RandomNumberGenerator) -> void:

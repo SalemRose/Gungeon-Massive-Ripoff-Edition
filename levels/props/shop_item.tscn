@@ -1,0 +1,31 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://levels/props/shop_item.gd" id="1_shop"]
+
+[node name="ShopItem" type="Node2D"]
+script = ExtResource("1_shop")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="Pedestal" type="Polygon2D" parent="Visual"]
+color = Color(0.3, 0.27, 0.2, 1)
+polygon = PackedVector2Array(-14, 0, 14, 0, 14, 10, -14, 10)
+
+[node name="PriceLabel" type="Label" parent="."]
+offset_left = -20.0
+offset_top = 11.0
+offset_right = 20.0
+offset_bottom = 29.0
+theme_override_font_sizes/font_size = 12
+text = "0"
+horizontal_alignment = 1
+
+[node name="Prompt" type="Label" parent="."]
+visible = false
+offset_left = -10.0
+offset_top = -36.0
+offset_right = 10.0
+offset_bottom = -18.0
+theme_override_font_sizes/font_size = 13
+text = "E"
+horizontal_alignment = 1

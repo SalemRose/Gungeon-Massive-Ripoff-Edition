@@ -109,9 +109,15 @@ func _physics_process(delta: float) -> void:
 
 ## Would picking this up help the player right now?
 func can_collect(player: Player) -> bool:
+	return is_useful(player, kind)
+
+
+## Would a `pickup_kind` help `player` right now? (Shops ask this too, so you
+## are never charged for a heart at full health.)
+static func is_useful(player: Player, pickup_kind: int) -> bool:
 	if player.state == Player.State.DEAD:
 		return false
-	match kind:
+	match pickup_kind:
 		Kind.HEART:
 			return player.health < player.max_health
 		Kind.AMMO:
@@ -123,29 +129,30 @@ func can_collect(player: Player) -> bool:
 	return false
 
 
-func _collect(player: Player) -> void:
-	var label := ""
-	var color := Color.WHITE
-	match kind:
+## Gives the player what `pickup_kind` is worth. Returns the floating-text
+## label and its color (for the caller to show). Used by pickups and shops.
+static func apply_effect(player: Player, pickup_kind: int, count: int = 1, fraction: float = 0.4) -> Dictionary:
+	match pickup_kind:
 		Kind.HEART:
-			player.heal(amount)
-			label = "+HP"
-			color = Color(1.0, 0.45, 0.5)
+			player.heal(count)
+			return {"label": "+HP", "color": Color(1.0, 0.45, 0.5)}
 		Kind.AMMO:
 			for weapon in player.weapon_manager.weapons:
 				if not weapon.data.infinite_ammo:
-					weapon.add_ammo(ceili(weapon.data.max_reserve_ammo * ammo_fraction))
-			label = "+AMMO"
-			color = Color(1.0, 0.9, 0.4)
+					weapon.add_ammo(ceili(weapon.data.max_reserve_ammo * fraction))
+			return {"label": "+AMMO", "color": Color(1.0, 0.9, 0.4)}
 		Kind.BLANK:
-			player.add_blanks(amount)
-			label = "+BLANK"
-			color = Color(0.6, 0.9, 1.0)
+			player.add_blanks(count)
+			return {"label": "+BLANK", "color": Color(0.6, 0.9, 1.0)}
 		Kind.COIN:
-			player.add_coins(amount)
-			label = "+%d" % amount
-			color = Color(1.0, 0.85, 0.2)
-	FloatingText.spawn(get_parent(), global_position + Vector2(0.0, -10.0), label, color, 10)
+			player.add_coins(count)
+			return {"label": "+%d" % count, "color": Color(1.0, 0.85, 0.2)}
+	return {"label": "", "color": Color.WHITE}
+
+
+func _collect(player: Player) -> void:
+	var result := apply_effect(player, kind, amount, ammo_fraction)
+	FloatingText.spawn(get_parent(), global_position + Vector2(0.0, -10.0), result.label, result.color, 10)
 	collected.emit(kind)
 	set_physics_process(false)
 	queue_free()
@@ -156,8 +163,13 @@ func _collect(player: Player) -> void:
 func _build_visual() -> void:
 	for child in visual.get_children():
 		child.queue_free()
+	visual.add_child(make_icon(kind))
+
+
+## The placeholder shape for a kind (shops draw the same icons).
+static func make_icon(pickup_kind: int) -> Polygon2D:
 	var polygon := Polygon2D.new()
-	match kind:
+	match pickup_kind:
 		Kind.HEART:
 			polygon.color = Color(0.9, 0.2, 0.3)
 			polygon.polygon = PackedVector2Array([Vector2(0, 7), Vector2(-8, -1), Vector2(-5, -6), Vector2(0, -3), Vector2(5, -6), Vector2(8, -1)])
@@ -176,4 +188,4 @@ func _build_visual() -> void:
 			for i in 10:
 				coin_points.append(Vector2.from_angle(TAU * i / 10.0) * 4.5)
 			polygon.polygon = coin_points
-	visual.add_child(polygon)
+	return polygon
