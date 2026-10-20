@@ -16,14 +16,14 @@ extends Area2D
 
 signal collected(kind: int)
 
-## Add new kinds at the END (8b adds coins).
-enum Kind { HEART, AMMO, BLANK }
+## Add new kinds at the END.
+enum Kind { HEART, AMMO, BLANK, COIN }
 
 const SCENE: PackedScene = preload("res://entities/pickups/pickup.tscn")
 const PLAYER_GROUP := "player"
 
 @export var kind: Kind = Kind.HEART
-## Hearts healed / blanks given.
+## Hearts healed / blanks given / coins worth.
 @export var amount: int = 1
 ## Ammo boxes refill this fraction of every gun's MAX reserve.
 @export_range(0.0, 1.0) var ammo_fraction: float = 0.4
@@ -33,6 +33,9 @@ const PLAYER_GROUP := "player"
 
 ## Drop chances per enemy kill (before the enemy's own multiplier).
 const DROP_CHANCES := {Kind.HEART: 0.06, Kind.AMMO: 0.14, Kind.BLANK: 0.03}
+
+## Coins dropped per kill: index = how many (0..3), value = chance (sums to 1).
+const COIN_DROP_ODDS := [0.40, 0.40, 0.15, 0.05]
 
 var _bob_time: float = 0.0
 
@@ -60,6 +63,24 @@ static func roll_drop(rng: RandomNumberGenerator, luck: float = 1.0) -> int:
 		if roll < total:
 			return pickup_kind
 	return -1
+
+
+## How many coins an enemy kill drops (0 to 3). `luck` shifts odds upward.
+static func roll_coins(rng: RandomNumberGenerator, luck: float = 1.0) -> int:
+	if luck <= 0.0:
+		return 0
+	var roll := rng.randf()
+	var count := 0
+	var total := 0.0
+	for i in COIN_DROP_ODDS.size():
+		total += COIN_DROP_ODDS[i]
+		if roll < total:
+			count = i
+			break
+	# More luck: a chance for one extra coin.
+	if luck > 1.0 and rng.randf() < luck - 1.0:
+		count += 1
+	return count
 
 
 func _ready() -> void:
@@ -97,6 +118,8 @@ func can_collect(player: Player) -> bool:
 			return player.weapon_manager.weapons.any(func(w): return not w.data.infinite_ammo and w.reserve < w.data.max_reserve_ammo)
 		Kind.BLANK:
 			return player.blanks < player.max_blanks
+		Kind.COIN:
+			return true
 	return false
 
 
@@ -118,6 +141,10 @@ func _collect(player: Player) -> void:
 			player.add_blanks(amount)
 			label = "+BLANK"
 			color = Color(0.6, 0.9, 1.0)
+		Kind.COIN:
+			player.add_coins(amount)
+			label = "+%d" % amount
+			color = Color(1.0, 0.85, 0.2)
 	FloatingText.spawn(get_parent(), global_position + Vector2(0.0, -10.0), label, color, 10)
 	collected.emit(kind)
 	set_physics_process(false)
@@ -143,4 +170,10 @@ func _build_visual() -> void:
 			for i in 12:
 				points.append(Vector2.from_angle(TAU * i / 12.0) * 6.0)
 			polygon.polygon = points
+		Kind.COIN:
+			polygon.color = Color(1.0, 0.82, 0.2)
+			var coin_points := PackedVector2Array()
+			for i in 10:
+				coin_points.append(Vector2.from_angle(TAU * i / 10.0) * 4.5)
+			polygon.polygon = coin_points
 	visual.add_child(polygon)

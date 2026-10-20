@@ -186,10 +186,13 @@ func _finish_spawning() -> void:
 func _drop_loot() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
+	var holder: Node = _room if _room != null else get_parent()
 	var kind := Pickup.roll_drop(rng, drop_luck)
 	if kind >= 0:
-		var holder: Node = _room if _room != null else get_parent()
 		Pickup.spawn(holder, global_position, kind)
+	# Coins scatter a little so they don't stack on one spot.
+	for i in Pickup.roll_coins(rng, drop_luck):
+		Pickup.spawn(holder, global_position + Vector2(rng.randf_range(-12.0, 12.0), rng.randf_range(-12.0, 12.0)), Pickup.Kind.COIN)
 
 
 func _die() -> void:

@@ -20,6 +20,8 @@ extends CharacterBody2D
 signal health_changed(current: int, maximum: int)
 signal rolled(direction: Vector2)
 signal blanks_changed(current: int, maximum: int)
+## The coin purse changed (picked up, or spent in a shop).
+signal coins_changed(current: int)
 ## A melee swing began, aimed along `direction`.
 signal melee_swung(direction: Vector2)
 ## The swing knocked `count` enemy bullets back at their owners.
@@ -126,6 +128,9 @@ var _roll_cooldown_left: float = 0.0
 var _roll_buffer_left: float = 0.0
 var _hurt_iframes_left: float = 0.0
 var blanks: int
+## Currency for this run (shops). Resets on a new run; permanent currency is a
+## separate thing (meta-progression, step 12).
+var coins: int = 0
 var _melee_time: float = 0.0
 var _melee_cooldown_left: float = 0.0
 var _melee_hit_done: bool = false
@@ -461,6 +466,20 @@ func add_blanks(amount: int) -> int:
 	blanks = clampi(blanks + amount, 0, max_blanks)
 	blanks_changed.emit(blanks, max_blanks)
 	return blanks - before
+
+
+func add_coins(amount: int) -> void:
+	coins = maxi(0, coins + amount)
+	coins_changed.emit(coins)
+
+
+## Pays `price` if you can afford it. Returns false (and takes nothing) if not.
+func spend_coins(price: int) -> bool:
+	if price < 0 or coins < price:
+		return false
+	coins -= price
+	coins_changed.emit(coins)
+	return true
 
 
 func heal(amount: int) -> void:

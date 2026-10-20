@@ -11,6 +11,7 @@ extends CanvasLayer
 @onready var ammo_label: Label = $Root/AmmoLabel
 @onready var reload_bar: ProgressBar = $Root/ReloadBar
 @onready var blank_label: Label = $Root/BlankLabel
+@onready var coin_label: Label = $Root/CoinLabel
 @onready var room_label: Label = $RoomLabel
 
 var _player: Player
@@ -27,6 +28,7 @@ func _process(_delta: float) -> void:
 	health_bar.value = _player.health
 	health_label.text = "%d / %d" % [_player.health, _player.max_health]
 	blank_label.text = "Blanks: %d" % _player.blanks
+	coin_label.text = "Coins: %d" % _player.coins
 
 	var manager := _player.weapon_manager
 	var weapon := manager.current
