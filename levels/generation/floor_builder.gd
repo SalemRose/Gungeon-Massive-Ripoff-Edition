@@ -139,9 +139,6 @@ func _build_corridors(cell: FloorLayout.Cell) -> void:
 		var span := (b.position - a.position).length()
 		var corridor := Corridor.new()
 		corridor.horizontal = horizontal
-		# Corridors are added after the rooms, so without this their floor would
-		# be painted OVER the rooms' doors and hide them.
-		corridor.z_index = -1
 		corridor.length = span - from_edge - to_edge
 		var along := Vector2.RIGHT if horizontal else Vector2.DOWN
 		corridor.position = a.position + along * (from_edge + corridor.length * 0.5)
