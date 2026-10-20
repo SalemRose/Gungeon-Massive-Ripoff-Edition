@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="BossPhase" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://entities/enemies/boss_phase.gd" id="1_phase"]
+[ext_resource type="Script" path="res://entities/enemies/enemy_attack.gd" id="9_atk"]
+[ext_resource type="Resource" path="res://entities/enemies/bosses/attacks/warden_spiral.tres" id="2_a"]
+[ext_resource type="Resource" path="res://entities/enemies/bosses/attacks/warden_fan.tres" id="3_a"]
+[ext_resource type="Resource" path="res://entities/enemies/bosses/attacks/warden_ring.tres" id="4_a"]
+
+[resource]
+script = ExtResource("1_phase")
+display_name = "Pressure"
+health_threshold = 0.6
+movement = 2
+move_speed = 55.0
+preferred_distance = 240.0
+attacks = Array[ExtResource("9_atk")]([ExtResource("2_a"), ExtResource("3_a"), ExtResource("4_a")])

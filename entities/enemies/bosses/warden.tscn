@@ -1,0 +1,28 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="PackedScene" path="res://entities/enemies/enemy.tscn" id="1_base"]
+[ext_resource type="Script" path="res://entities/enemies/boss.gd" id="2_boss"]
+[ext_resource type="Script" path="res://entities/enemies/boss_phase.gd" id="3_phase"]
+[ext_resource type="Resource" path="res://entities/enemies/bosses/warden_phase1.tres" id="4_p1"]
+[ext_resource type="Resource" path="res://entities/enemies/bosses/warden_phase2.tres" id="5_p2"]
+[ext_resource type="Resource" path="res://entities/enemies/bosses/warden_phase3.tres" id="6_p3"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_boss"]
+radius = 22.0
+
+[node name="Warden" instance=ExtResource("1_base")]
+script = ExtResource("2_boss")
+max_health = 320.0
+spawn_delay = 1.2
+boss_name = "The Warden"
+phases = Array[ExtResource("3_phase")]([ExtResource("4_p1"), ExtResource("5_p2"), ExtResource("6_p3")])
+drop_luck = 0.0
+
+[node name="CollisionShape2D" parent="." index="0"]
+shape = SubResource("CircleShape2D_boss")
+
+[node name="Visual" parent="." index="1"]
+scale = Vector2(2.4, 2.4)
+
+[node name="Body" parent="Visual" index="0"]
+color = Color(0.75, 0.25, 0.25, 1)

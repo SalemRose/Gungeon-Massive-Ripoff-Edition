@@ -41,6 +41,7 @@ const ENEMY_POOL: Array[String] = [
 ]
 const PILLAR_SCENE: PackedScene = preload("res://levels/rooms/pillar.tscn")
 const TABLE_SCENE: PackedScene = preload("res://levels/props/table.tscn")
+const BOSS_SCENE: PackedScene = preload("res://entities/enemies/bosses/warden.tscn")
 const CHEST_SCENE: PackedScene = preload("res://levels/props/chest.tscn")
 const SHOP_ITEM_SCENE: PackedScene = preload("res://levels/props/shop_item.tscn")
 ## What the shop sells: [pickup kind, price]. Left to right on the pedestals.
@@ -97,6 +98,8 @@ func _build_room(cell: FloorLayout.Cell, rng: RandomNumberGenerator) -> void:
 	room.set_meta("grid_pos", cell.grid_pos)   # the minimap maps Room -> cell with this
 	if cell.type == FloorLayout.RoomType.COMBAT:
 		room.waves = _make_waves(rng)
+	elif cell.type == FloorLayout.RoomType.BOSS:
+		room.waves = _make_boss_waves()
 	add_child(room)
 	# Props go in after add_child: they are just children on the world layer.
 	if cell.type == FloorLayout.RoomType.COMBAT:
@@ -106,6 +109,14 @@ func _build_room(cell: FloorLayout.Cell, rng: RandomNumberGenerator) -> void:
 	elif cell.type == FloorLayout.RoomType.TREASURE:
 		_add_chest(room, rng)
 	rooms[cell.grid_pos] = room
+
+
+## The boss room is one wave: just the boss. Clearing it = killing the boss.
+func _make_boss_waves() -> Array[RoomWave]:
+	var wave := RoomWave.new()
+	wave.enemies.append(BOSS_SCENE)
+	wave.delay = 1.5
+	return [wave] as Array[RoomWave]
 
 
 ## 2 waves, a bit bigger on deeper floors.

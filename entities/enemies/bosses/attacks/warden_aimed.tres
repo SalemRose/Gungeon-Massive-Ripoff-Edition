@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="EnemyAttack" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://entities/enemies/enemy_attack.gd" id="1_atk"]
+
+[resource]
+script = ExtResource("1_atk")
+display_name = "Aimed burst"
+windup_time = 0.5
+cooldown = 1.0
+cooldown_jitter = 0.2
+attack_range = 600
+shots = 5
+shot_interval = 0.14
+bullets_per_shot = 1
+arc_degrees = 0.0
+aim_at_player = true
+random_start_angle = false
+rotation_per_shot_degrees = 0.0
+bullet_speed = 190
+bullet_damage = 2.0
+bullet_lifetime = 6.0
+bullet_color = Color(1.0, 0.35, 0.3, 1)

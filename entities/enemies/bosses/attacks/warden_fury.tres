@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="EnemyAttack" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://entities/enemies/enemy_attack.gd" id="1_atk"]
+
+[resource]
+script = ExtResource("1_atk")
+display_name = "Fury spiral"
+windup_time = 0.7
+cooldown = 1.2
+cooldown_jitter = 0.2
+attack_range = 600
+shots = 60
+shot_interval = 0.06
+bullets_per_shot = 5
+arc_degrees = 360.0
+aim_at_player = false
+random_start_angle = true
+rotation_per_shot_degrees = 13.0
+bullet_speed = 135
+bullet_damage = 2.0
+bullet_lifetime = 6.0
+bullet_color = Color(1.0, 0.2, 0.2, 1)

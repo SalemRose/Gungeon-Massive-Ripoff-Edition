@@ -43,6 +43,7 @@ func _ready() -> void:
 	minimap = Minimap.new()
 	map_layer.add_child(minimap)
 	minimap.setup(layout, room_camera)
+	map_layer.add_child(BossBar.new())   # shows itself while a boss is fighting
 	minimap.position = Vector2(get_viewport().get_visible_rect().size.x - minimap.size.x - 12.0, 12.0)
 
 
