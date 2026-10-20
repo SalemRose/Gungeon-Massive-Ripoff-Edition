@@ -1,78 +1,50 @@
-# Gungeon Massive Ripoff Edition: roadmap
+# Gungeon Massive Ripoff Edition: roadmap and status
 
-Godot 4.7.2, GDScript. A roguelite take on Enter the Gungeon: connected-room floors, bullet-hell gunplay, last-resort melee, and a hub with permanent unlocks. Art is placeholder shapes for now; everything visible lives under a `Visual` node so final art can be swapped in later.
+Full version lives in the repo as ROADMAP.md. Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` node). Code layout: entities/, weapons/, levels/, ui/, autoload/.
 
-Working style: small segments, one at a time, each tested before the next. Legend: [x] done, [ ] to do.
+Working style: small segments, one at a time, each tested and delivered (changed files only) before the next. Push to GitHub only when the user says so.
 
 ## Done
 
-### 1. Foundation
-- [x] Input (keyboard/mouse and gamepad), movement, aiming, dodge roll with i-frames
+1. Foundation (input, movement, aim, roll)
+2. Guns/bullets (4 guns)
+3. Enemies (4 types)
+4. Rooms/doors/waves
+5. 5a Blank
+6. 5b Flippable tables
+7. 6a Melee swing
+8. 6b Bullet deflection
+9. 7a Floor generator
+10. 7b Build rooms + corridors
+11. 7c Room camera
+12. 7d Minimap
+13. 7e Pathfinding
+14. 8a Pickups (heart/ammo/blank) + drops
+15. 8b Coins + HUD
+16. 8c Shop room
+17. 8d Treasure room (chest, heart containers)
+18. 9a Boss base (phases) + first boss, The Warden
 
-### 2. Guns and bullets
-- [x] Data-driven weapons (`WeaponData` .tres), ammo and reload, bounce/pierce
-- [x] 4 guns: pistol (infinite), SMG, shotgun, ricochet; ammo HUD
+## Next, in order
 
-### 3. Enemies
-- [x] Enemy base + `EnemyAttack` resource (aimed burst, fan, ring, spiral)
-- [x] Bullet Kin, Shotgun Kin, Ring Turret, Spiral Mage; health bar
-
-### 4. Rooms
-- [x] Room builds walls and doorways from size + exits
-- [x] Locking doors, enemy waves (`RoomWave`), test level
-
-### 5. Defensive tools
-- [x] 5a Blank (Q / left shoulder): clears bullets, knockback, i-frames
-- [x] 5b Flippable tables (E / Y): cover against enemy bullets, generic interactables
-
-### 6. Melee
-- [x] 6a Melee swing: short range, cooldown, low damage (a last resort)
-- [x] 6b Bullet deflection on the swing
-
-### 7. Floors
-- [x] 7a Seeded floor generator (pure data, `FloorLayout`)
-- [x] 7b Build rooms from a layout and link them with corridors (`FloorBuilder`)
-- [x] 7c Room camera: held inside the room, free in corridors
-- [x] 7d Minimap
-- [x] 7e Enemy pathfinding (A* grid per room)
-
-### 8. Economy (in progress)
-- [x] 8a Pickups: hearts, ammo, blanks; enemy drops
-- [x] 8b Coins and HUD display
-
-## To do, in order
-
-### 8. Economy (rest)
-- [ ] 8c Shop room: items for sale, buy with coins
-- [ ] 8d Treasure room: free item / chest
-
-### 9. Boss and run structure
-- [ ] 9a Boss base class and the first boss
-- [ ] 9b Stairs to the next floor, multi-floor runs
-
-### 10. More guns (six more, for 10 total)
-- [ ] 10a-c Homing, burst, charge, beam, boomerang, orbit
-
-### 11. Items
-- [ ] 11a Item system
-- [ ] 11b First five passive items
-
-### 12. Meta-progression
-- [ ] 12a Save system
-- [ ] 12b Permanent currency and unlocks
-- [ ] 12c Hub scene
-
-### 13. Menus
-- [ ] 13a Main menu (title, new game, load, settings, quit)
-- [ ] 13b Settings (resolution presets, fullscreen, music volume, sfx volume)
-- [ ] 13c Pause menu
-
-### 14. Polish
-- [ ] 14 Final art swap pass
+9b Stairs + multi-floor runs \
+10a-c Six more guns (homing, burst, charge, beam, boomerang, orbit) \
+11a Item system \
+11b First five passive items \
+12a Save system \
+12b Permanent currency/unlocks \
+12c Hub scene \
+13a Main menu \
+13b Settings (resolutions, fullscreen, music/sfx volume) \
+13c Pause menu \
+14 Final art swap pass
 
 ## Notes
-- Physics layers: 1 world, 2 player, 3 enemy, 4 player projectile, 5 enemy projectile, 6 pickup, 7 interactable, 8 table, 9 cover.
-- Position nodes BEFORE `add_child` when spawning bodies, or they briefly sit at the origin and can shove the player.
-- Add new enum values at the END (they may end up in saved data).
-- Draw order follows tree order: the floor node must come before the player.
-- The original wish list is in `ROADMAP.txt` (main menu and settings), covered by segment 13.
+
+- Physics layers: 1 world, 2 player, 3 enemy, 4 player projectile, 5 enemy projectile, 6 pickup, 7 interactable, 8 table, 9 cover
+- Position nodes BEFORE add_child when spawning bodies
+- Add enum values at the END
+- Draw order follows tree order: floor node before the player, corridors under the rooms (z_index -1) so they don't hide the doors
+- Main scene is now levels/floor_level/floor_level.tscn (generated floors); test_level is the old hand-built one
+- Interactables (tables, shop items, chests) join the "interactables" group and provide can_interact / interact / get_prompt
+- A new boss = a scene inheriting enemy.tscn with boss.gd plus BossPhase .tres files (no new code)
