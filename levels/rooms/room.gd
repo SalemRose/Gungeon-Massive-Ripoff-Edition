@@ -72,6 +72,14 @@ const OBSTACLE_MASK := 1 | 128
 @export var wall_color: Color = Color(0.32, 0.3, 0.38)
 
 var state: State = State.IDLE
+## Navigation grid: square cells this big (px), see "Navigation" below.
+const NAV_CELL := 16.0
+## Cells whose center is closer than this to an obstacle count as blocked,
+## so a path always has room for an enemy body (radius ~9).
+const NAV_CLEARANCE := 11.0
+## The grid is rebuilt at most this often (a table may have broken meanwhile).
+const NAV_REFRESH := 1.5
+
 ## Index of the wave currently (or last) played; -1 before the first.
 var wave_index: int = -1
 var doors: Array[Door] = []
@@ -88,6 +96,10 @@ var _doors_requested: bool = false
 var _wave_pending: bool = false
 var _wave_timer: float = 0.0
 var _player: Player
+var _nav: AStarGrid2D
+var _nav_cols: int = 0
+var _nav_rows: int = 0
+var _nav_time: float = -999.0
 
 
 func _ready() -> void:
@@ -407,6 +419,90 @@ func _is_spot_free(spot: Vector2) -> bool:
 	query.transform = Transform2D(0.0, spot)
 	query.collision_mask = OBSTACLE_MASK
 	return get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty()
+
+
+# --- Navigation -----------------------------------------------------------------------
+# A grid over the floor, A* on top. Cells touching a wall, pillar or table are
+# solid. Enemies ask for a path only when they cannot walk straight at their
+# goal (see Enemy._steer_direction), so the cost stays small. The grid is
+# built on the first question and refreshed now and then.
+
+## Path from `from` to `to` (global positions) around obstacles: a list of
+## waypoints, empty if there is no way. Start and goal are moved to the
+## nearest free cell if they sit in a blocked one.
+func nav_path(from: Vector2, to: Vector2) -> PackedVector2Array:
+	_nav_ensure()
+	var a := _nav_nearest_free(_nav_cell(from))
+	var b := _nav_nearest_free(_nav_cell(to))
+	var result := PackedVector2Array()
+	if a.x < 0 or b.x < 0:
+		return result
+	for cell in _nav.get_id_path(a, b):
+		result.append(_nav_cell_center(cell))
+	return result
+
+
+## True when walking the straight line from `from` to `to` (global) stays on
+## free cells, i.e. no obstacle is in the way.
+func nav_line_clear(from: Vector2, to: Vector2) -> bool:
+	_nav_ensure()
+	var steps := maxi(int(from.distance_to(to) / (NAV_CELL * 0.5)), 1)
+	for i in steps + 1:
+		var cell := _nav_cell(from.lerp(to, float(i) / steps))
+		if not _nav.is_in_boundsv(cell) or _nav.is_point_solid(cell):
+			return false
+	return true
+
+
+func _nav_cell(global_point: Vector2) -> Vector2i:
+	var local := to_local(global_point) + size * 0.5
+	return Vector2i(floori(local.x / NAV_CELL), floori(local.y / NAV_CELL))
+
+
+func _nav_cell_center(cell: Vector2i) -> Vector2:
+	return to_global((Vector2(cell) + Vector2(0.5, 0.5)) * NAV_CELL - size * 0.5)
+
+
+func _nav_ensure() -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	if _nav != null and now - _nav_time < NAV_REFRESH:
+		return
+	_nav_time = now
+	_nav_cols = ceili(size.x / NAV_CELL)
+	_nav_rows = ceili(size.y / NAV_CELL)
+	if _nav == null:
+		_nav = AStarGrid2D.new()
+		_nav.cell_size = Vector2(NAV_CELL, NAV_CELL)
+		_nav.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES
+		_nav.region = Rect2i(0, 0, _nav_cols, _nav_rows)
+		_nav.update()
+	var circle := CircleShape2D.new()
+	circle.radius = NAV_CLEARANCE
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = circle
+	query.collision_mask = OBSTACLE_MASK
+	var space := get_world_2d().direct_space_state
+	for x in _nav_cols:
+		for y in _nav_rows:
+			query.transform = Transform2D(0.0, _nav_cell_center(Vector2i(x, y)))
+			_nav.set_point_solid(Vector2i(x, y), not space.intersect_shape(query, 1).is_empty())
+
+
+## `cell`, or the closest free cell within 3 steps; (-1, -1) if none.
+func _nav_nearest_free(cell: Vector2i) -> Vector2i:
+	cell = Vector2i(clampi(cell.x, 0, _nav_cols - 1), clampi(cell.y, 0, _nav_rows - 1))
+	for ring in 4:
+		var best := Vector2i(-1, -1)
+		var best_dist := INF
+		for dx in range(-ring, ring + 1):
+			for dy in range(-ring, ring + 1):
+				var c := cell + Vector2i(dx, dy)
+				if _nav.is_in_boundsv(c) and not _nav.is_point_solid(c) and float(dx * dx + dy * dy) < best_dist:
+					best = c
+					best_dist = float(dx * dx + dy * dy)
+		if best.x >= 0:
+			return best
+	return Vector2i(-1, -1)
 
 
 func _find_player() -> Player:

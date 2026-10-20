@@ -38,6 +38,9 @@ enum Movement {
 ## Enemy bullets hit all three.
 const BULLET_HIT_MASK := 1 | 2 | 256
 const WORLD_MASK := 1
+## Pathfinding: seconds between route updates, and how close counts as "reached" a waypoint.
+const REPATH_INTERVAL := 0.35
+const WAYPOINT_REACHED := 10.0
 
 @export_group("Stats")
 @export var max_health: float = 20.0
@@ -78,12 +81,19 @@ var _strafe_left: float = 0.0
 var _hit_flash_left: float = 0.0
 var _can_see_target: bool = false
 var _base_scale: Vector2 = Vector2.ONE
+## Pathfinding: the room we live in (null in sandboxes), the current route and
+## where we are on it. See _steer_direction().
+var _room: Room
+var _path: PackedVector2Array = PackedVector2Array()
+var _path_index: int = 0
+var _repath_left: float = 0.0
 
 @onready var visual: Node2D = $Visual
 
 
 func _ready() -> void:
 	add_to_group("enemies")  # lets blanks and other effects find every enemy
+	_room = _find_room()
 	health = max_health
 	_base_scale = visual.scale
 	if auto_activate:
@@ -210,6 +220,34 @@ func _move(delta: float, speed_factor: float) -> void:
 	velocity = velocity.move_toward(desired, acceleration * delta)
 
 
+## The Room above us in the tree (enemies live in Room/Enemies), if any.
+func _find_room() -> Room:
+	var node := get_parent()
+	while node != null and not (node is Room):
+		node = node.get_parent()
+	return node as Room
+
+
+## Direction to walk to reach `goal`. Straight at it when nothing is in the
+## way; otherwise along an A* route around pillars, tables and wall corners
+## (recomputed a few times per second because the goal moves).
+func _steer_direction(goal: Vector2) -> Vector2:
+	var straight := (goal - global_position).normalized()
+	if _room == null or _room.nav_line_clear(global_position, goal):
+		_path = PackedVector2Array()
+		return straight
+	_repath_left -= get_physics_process_delta_time()
+	if _repath_left <= 0.0 or _path.is_empty():
+		_path = _room.nav_path(global_position, goal)
+		_path_index = 0
+		_repath_left = REPATH_INTERVAL
+	while _path_index < _path.size() and global_position.distance_to(_path[_path_index]) < WAYPOINT_REACHED:
+		_path_index += 1
+	if _path_index >= _path.size():
+		return straight   # no route (or arrived): fall back to the old behaviour
+	return (_path[_path_index] - global_position).normalized()
+
+
 func _desired_velocity() -> Vector2:
 	if movement == Movement.STATIONARY or not _target_alive():
 		return Vector2.ZERO
@@ -222,10 +260,10 @@ func _desired_velocity() -> Vector2:
 		Movement.APPROACH:
 			# Keep walking if too far OR if a wall blocks the view.
 			if distance > preferred_distance or not _can_see_target:
-				return direction * move_speed
+				return _steer_direction(target.global_position) * move_speed
 		Movement.KEEP_DISTANCE:
 			if distance > preferred_distance + distance_tolerance or not _can_see_target:
-				return direction * move_speed
+				return _steer_direction(target.global_position) * move_speed
 			if distance < preferred_distance - distance_tolerance:
 				return -direction * move_speed
 			# In the sweet spot: circle around the player, changing direction now and then.
