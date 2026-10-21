@@ -158,6 +158,11 @@ func take_damage(amount: float) -> bool:
 	return true
 
 
+## True while the enemy can be hurt (awake and not dying). Homing bullets use it.
+func can_be_targeted() -> bool:
+	return state == State.IDLE or state == State.WINDUP or state == State.ATTACKING
+
+
 func is_alive() -> bool:
 	return state != State.DEAD
 

@@ -27,6 +27,9 @@ var shooter: Node2D
 
 var _cooldown_left: float = 0.0
 var _reload_left: float = 0.0
+## BURST guns: shots still to come in the current burst, and the wait for the next.
+var _burst_left: int = 0
+var _burst_timer: float = 0.0
 
 
 func setup(weapon_data: WeaponData, owner_node: Node2D) -> void:
@@ -39,6 +42,7 @@ func setup(weapon_data: WeaponData, owner_node: Node2D) -> void:
 
 func _physics_process(delta: float) -> void:
 	_cooldown_left = maxf(0.0, _cooldown_left - delta)
+	_process_burst(delta)
 	if reloading:
 		_reload_left -= delta
 		if _reload_left <= 0.0:
@@ -88,23 +92,14 @@ func try_fire(muzzle_position: Vector2, aim: Vector2) -> bool:
 	if not can_fire():
 		return false
 
-	var origin := Bullet.safe_spawn_position(shooter, muzzle_position)
-	var count := maxi(1, data.projectiles_per_shot)
-	for i in count:
-		# Evenly spread the bullets across the cone, centred on the aim...
-		var angle := 0.0
-		if count > 1:
-			angle = lerpf(-data.spread_degrees * 0.5, data.spread_degrees * 0.5, float(i) / float(count - 1))
-		# ...then add a little randomness to each one.
-		angle += randf_range(-data.inaccuracy_degrees, data.inaccuracy_degrees)
-		_spawn_bullet(origin, aim.rotated(deg_to_rad(angle)))
-
-	magazine -= 1
+	_shoot(muzzle_position, aim)
 	_cooldown_left = 1.0 / maxf(data.fire_rate, 0.01)
-	fired.emit()
-
-	if magazine == 0 and can_reload():
-		start_reload()  # Gungeon reloads on its own when the magazine runs dry.
+	if data.fire_mode == WeaponData.FireMode.BURST and data.burst_count > 1:
+		# The rest of the burst follows by itself (see _process_burst). The next
+		# click is only possible after the whole burst plus the usual cooldown.
+		_burst_left = data.burst_count - 1
+		_burst_timer = data.burst_interval
+		_cooldown_left += data.burst_interval * float(data.burst_count - 1)
 	return true
 
 
@@ -120,6 +115,7 @@ func start_reload() -> void:
 func cancel_reload() -> void:
 	reloading = false
 	_reload_left = 0.0
+	_burst_left = 0   # swapping away also drops the rest of a burst
 
 
 func add_ammo(amount: int) -> void:
@@ -127,6 +123,41 @@ func add_ammo(amount: int) -> void:
 
 
 # --- Internals --------------------------------------------------------------------
+
+## One shot: the bullets of a single trigger pull, one ammo, then the signal.
+func _shoot(muzzle_position: Vector2, aim: Vector2) -> void:
+	var origin := Bullet.safe_spawn_position(shooter, muzzle_position)
+	var count := maxi(1, data.projectiles_per_shot)
+	for i in count:
+		# Evenly spread the bullets across the cone, centred on the aim...
+		var angle := 0.0
+		if count > 1:
+			angle = lerpf(-data.spread_degrees * 0.5, data.spread_degrees * 0.5, float(i) / float(count - 1))
+		# ...then add a little randomness to each one.
+		angle += randf_range(-data.inaccuracy_degrees, data.inaccuracy_degrees)
+		_spawn_bullet(origin, aim.rotated(deg_to_rad(angle)))
+
+	magazine -= 1
+	fired.emit()
+
+	if magazine == 0 and can_reload():
+		start_reload()  # Gungeon reloads on its own when the magazine runs dry.
+
+
+## The follow-up shots of a burst. They aim wherever the player aims NOW, and
+## stop if the player rolls, dies, swaps gun, or the magazine runs out.
+func _process_burst(delta: float) -> void:
+	if _burst_left <= 0:
+		return
+	var player := shooter as Player
+	if player == null or player.state != Player.State.NORMAL or magazine <= 0 or reloading:
+		_burst_left = 0
+		return
+	_burst_timer -= delta
+	if _burst_timer <= 0.0:
+		_burst_left -= 1
+		_burst_timer += data.burst_interval
+		_shoot(player.muzzle.global_position, player.aim_direction)
 
 func _finish_reload() -> void:
 	reloading = false
@@ -148,6 +179,8 @@ func _spawn_bullet(origin: Vector2, direction: Vector2) -> void:
 	bullet.lifetime = data.bullet_lifetime
 	bullet.bounces = data.bounces
 	bullet.pierce = data.pierce
+	bullet.homing_turn_rate = data.homing_turn_rate
+	bullet.homing_range = data.homing_range
 	bullet.hit_mask = PLAYER_BULLET_HIT_MASK
 	bullet.color = data.color
 	bullet.direction = direction

@@ -14,6 +14,7 @@ extends Resource
 enum FireMode {
 	SEMI,  ## One shot per click. Holding the button does nothing extra.
 	AUTO,  ## Keeps firing while the button is held.
+	BURST, ## One click fires `burst_count` quick shots in a row. (Added last.)
 }
 
 @export var display_name: String = "Gun"
@@ -31,6 +32,11 @@ enum FireMode {
 ## Random error added to every bullet, +/- degrees. Higher = less accurate.
 @export var inaccuracy_degrees: float = 0.0
 
+## BURST guns only: shots per click, and the pause between them. Every shot
+## costs one bullet of ammo. `fire_rate` then means bursts per second.
+@export var burst_count: int = 3
+@export var burst_interval: float = 0.07
+
 @export_group("Bullet")
 ## Leave empty to use the default bullet. Set it later for guns with their own
 ## bullet art or behaviour.
@@ -45,6 +51,10 @@ enum FireMode {
 @export var bounces: int = 0
 ## How many enemies a bullet can pass through (0 = stops at the first).
 @export var pierce: int = 0
+## HOMING: how fast the bullet can turn toward an enemy, in degrees per second
+## (0 = flies straight). Only enemies within `homing_range` pixels are chased.
+@export var homing_turn_rate: float = 0.0
+@export var homing_range: float = 240.0
 
 @export_group("Ammo")
 ## Bullets per magazine. A reload refills it from the reserve.

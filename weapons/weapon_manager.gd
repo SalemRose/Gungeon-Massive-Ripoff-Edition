@@ -51,7 +51,7 @@ func _physics_process(delta: float) -> void:
 	match current.data.fire_mode:
 		WeaponData.FireMode.AUTO:
 			wants_to_fire = Input.is_action_pressed("shoot")
-		WeaponData.FireMode.SEMI:
+		WeaponData.FireMode.SEMI, WeaponData.FireMode.BURST:
 			wants_to_fire = _shoot_buffer_left > 0.0
 
 	if not wants_to_fire:
@@ -64,8 +64,6 @@ func _physics_process(delta: float) -> void:
 
 	if current.try_fire(player.muzzle.global_position, player.aim_direction):
 		_shoot_buffer_left = 0.0
-		player.add_shake(current.data.screen_shake)
-		player.play_muzzle_flash()
 
 
 ## Mouse wheel and D-pad produce one-off events, so swapping is handled here
@@ -83,8 +81,15 @@ func add_weapon(data: WeaponData) -> Weapon:
 	var weapon := Weapon.new()
 	add_child(weapon)
 	weapon.setup(data, player)
+	weapon.fired.connect(_on_weapon_fired.bind(weapon))   # every shot, burst follow-ups included
 	weapons.append(weapon)
 	return weapon
+
+
+## Camera shake and muzzle flash for each shot.
+func _on_weapon_fired(weapon: Weapon) -> void:
+	player.add_shake(weapon.data.screen_shake)
+	player.play_muzzle_flash()
 
 
 func switch_to(index: int) -> void:

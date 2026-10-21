@@ -25,10 +25,12 @@ Working style: small segments, one at a time, each tested and delivered (changed
 17. 8d Treasure room (chest, heart containers)
 18. 9a Boss base (phases) + first boss, The Warden
 19. 9b Stairs + multi-floor runs (3 floors, state carried between floors)
+20. 10a Homing gun (Seeker) + burst gun (Burst Rifle)
 
 ## Next, in order
 
-10a-c Six more guns (homing, burst, charge, beam, boomerang, orbit) \
+10b Charge gun + beam gun \
+10c Boomerang gun + orbit gun \
 11a Item system \
 11b First five passive items \
 12a Save system \

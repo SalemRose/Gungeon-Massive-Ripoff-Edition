@@ -28,6 +28,10 @@ extends Node2D
 ## Physics layers this bullet collides with. Default: world (1) + enemies (4).
 @export_flags_2d_physics var hit_mask: int = 5
 @export var color: Color = Color(1.0, 0.9, 0.4)
+## HOMING (player bullets): turn speed toward the nearest enemy in degrees per
+## second, and how far away it can see one. 0 = flies straight.
+@export var homing_turn_rate: float = 0.0
+@export var homing_range: float = 240.0
 
 ## Physics layer bit for walls and other solid level geometry.
 const WORLD_MASK := 1
@@ -39,6 +43,12 @@ const ENEMY_MASK := 4
 var direction: Vector2 = Vector2.RIGHT
 
 var _age: float = 0.0
+## Typed as Node2D (not Enemy) on purpose: Enemy already refers to Bullet, and two
+## scripts naming each other's class make Godot fail to load them.
+var _homing_target: Node2D
+var _retarget_left: float = 0.0
+## How often a homing bullet looks for a (new) target.
+const HOMING_RETARGET_TIME := 0.12
 ## Things already hit/passed through: the ray ignores them from then on, so a
 ## bullet can't hit the same enemy twice or get stuck inside a rolling player.
 var _ignored: Array[RID] = []
@@ -68,6 +78,7 @@ func deflect(new_direction: Vector2, new_damage: float, speed_multiplier: float,
 	speed *= speed_multiplier
 	bounces = 0
 	pierce = 0
+	homing_turn_rate = 0.0
 	_age = 0.0
 	_ignored.clear()
 	color = new_color
@@ -96,6 +107,9 @@ func _physics_process(delta: float) -> void:
 		queue_free()
 		return
 
+	if homing_turn_rate > 0.0:
+		_steer_homing(delta)
+
 	var from := global_position
 	var to := from + direction * speed * delta
 	var query := PhysicsRayQueryParameters2D.create(from, to, hit_mask, _ignored)
@@ -105,6 +119,46 @@ func _physics_process(delta: float) -> void:
 		global_position = to
 	else:
 		_handle_hit(hit)
+
+
+## Turns the bullet toward the nearest reachable enemy (never faster than
+## homing_turn_rate, so a fast turn-around is impossible: it curves).
+func _steer_homing(delta: float) -> void:
+	_retarget_left -= delta
+	if not _can_home_on(_homing_target) or _retarget_left <= 0.0:
+		_retarget_left = HOMING_RETARGET_TIME
+		_homing_target = _find_homing_target()
+	if _homing_target == null:
+		return
+	var wanted := (_homing_target.global_position - global_position).angle()
+	var step := deg_to_rad(homing_turn_rate) * delta
+	var turn := clampf(angle_difference(direction.angle(), wanted), -step, step)
+	direction = direction.rotated(turn)
+	rotation = direction.angle()
+
+
+## The closest living enemy within range with no wall in between, or null.
+func _find_homing_target() -> Node2D:
+	var best: Node2D = null
+	var best_distance := homing_range
+	var space := get_world_2d().direct_space_state
+	for node in get_tree().get_nodes_in_group("enemies"):
+		var enemy := node as Node2D
+		if not _can_home_on(enemy):
+			continue
+		var distance := global_position.distance_to(enemy.global_position)
+		if distance >= best_distance:
+			continue
+		var query := PhysicsRayQueryParameters2D.create(global_position, enemy.global_position, WORLD_MASK)
+		if space.intersect_ray(query).is_empty():
+			best = enemy
+			best_distance = distance
+	return best
+
+
+## Only enemies that can actually be hurt right now are worth chasing.
+func _can_home_on(enemy: Node2D) -> bool:
+	return is_instance_valid(enemy) and enemy.has_method("can_be_targeted") and enemy.can_be_targeted()
 
 
 func _handle_hit(hit: Dictionary) -> void:
