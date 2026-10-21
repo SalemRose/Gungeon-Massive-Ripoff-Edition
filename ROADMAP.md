@@ -16,7 +16,7 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 - Each segment: implement, test (headless), commit locally, zip changed files, send, brief explanation, update this roadmap
 - Screenshots are internal checks only, never sent
 - The user's own ROADMAP.txt (main menu and settings wishes) is theirs: do not touch it
-- Local commits not yet pushed: 9b, 10a, 10b, 10c, 11a (last pushed: ROADMAP.md update)
+- Local commits not yet pushed: 9b, 10a, 10b, 10c, 11a, roadmap (last pushed: ROADMAP.md update)
 
 ## Game summary
 
