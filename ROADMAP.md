@@ -28,10 +28,10 @@ Working style: small segments, one at a time, each tested and delivered (changed
 20. 10a Homing gun (Seeker) + burst gun (Burst Rifle)
 21. 10b Charge gun (Charge Cannon) + beam gun (Beam Emitter)
 22. 10c Boomerang gun + orbit gun (Orbit Sphere): 10 guns in total
+23. 11a Item system: ItemData resources (stat multipliers + flat bonuses), ItemPool, item pedestal; items appear in treasure chests and the shop, carry between floors
 
 ## Next, in order
 
-11a Item system \
 11b First five passive items \
 12a Save system \
 12b Permanent currency/unlocks \
@@ -51,3 +51,4 @@ Working style: small segments, one at a time, each tested and delivered (changed
 - Interactables (tables, shop items, chests) join the "interactables" group and provide can_interact / interact / get_prompt
 - `Run` (autoload) holds the run: seed, floor, and the player snapshot carried between floors; fixed-seed floor levels ignore it (tests/debug)
 - A new boss = a scene inheriting enemy.tscn with boss.gd plus BossPhase .tres files (no new code)
+- A new passive item = an ItemData .tres in items/data/ (stat multipliers + flat bonuses, no code); chests and the shop pick it up automatically

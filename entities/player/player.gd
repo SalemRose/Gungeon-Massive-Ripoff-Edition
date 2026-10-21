@@ -27,6 +27,8 @@ signal melee_swung(direction: Vector2)
 ## The swing knocked `count` enemy bullets back at their owners.
 signal bullets_deflected(count: int)
 signal died
+## Fired when a passive item is picked up (HUD / effects can listen).
+signal item_added(item: ItemData)
 
 ## Physics layer masks: 1 = world, 4 = enemy.
 const WORLD_MASK := 1
@@ -128,6 +130,12 @@ var _roll_cooldown_left: float = 0.0
 var _roll_buffer_left: float = 0.0
 var _hurt_iframes_left: float = 0.0
 var blanks: int
+## Passive items taken this run. Their stat effects are folded into the three
+## multipliers below by add_item(); guns and movement read those.
+var items: Array[ItemData] = []
+var damage_mult: float = 1.0
+var fire_rate_mult: float = 1.0
+var move_speed_mult: float = 1.0
 ## Currency for this run (shops). Resets on a new run; permanent currency is a
 ## separate thing (meta-progression, step 12).
 var coins: int = 0
@@ -232,7 +240,7 @@ func _process_normal(delta: float) -> void:
 	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 
 	if input != Vector2.ZERO:
-		velocity = velocity.move_toward(input * move_speed, acceleration * delta)
+		velocity = velocity.move_toward(input * move_speed * move_speed_mult, acceleration * delta)
 	else:
 		velocity = velocity.move_toward(Vector2.ZERO, friction * delta)
 
@@ -260,7 +268,7 @@ func _process_melee(delta: float) -> void:
 	_melee_time += delta
 	# You can shuffle during the swing, but slowly.
 	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	velocity = velocity.move_toward(input * move_speed * melee_move_factor, acceleration * delta)
+	velocity = velocity.move_toward(input * move_speed * move_speed_mult * melee_move_factor, acceleration * delta)
 
 	if not _melee_hit_done and _melee_time >= melee_hit_time:
 		_melee_hit_done = true
@@ -355,7 +363,7 @@ func _process_rolling(delta: float) -> void:
 		state = State.NORMAL
 		_roll_cooldown_left = roll_cooldown
 		# Hand control back without a sudden speed jump.
-		velocity = velocity.limit_length(move_speed)
+		velocity = velocity.limit_length(move_speed * move_speed_mult)
 
 
 func _update_camera(delta: float) -> void:
@@ -474,6 +482,27 @@ func add_max_health(amount: int) -> void:
 	max_health += amount
 	health = mini(max_health, health + amount)
 	health_changed.emit(health, max_health)
+
+
+## Gives the player a passive item: remembers it and applies its effects.
+## Multipliers stack by multiplying; bonuses are added once.
+func add_item(item: ItemData) -> void:
+	items.append(item)
+	damage_mult *= item.damage_mult
+	fire_rate_mult *= item.fire_rate_mult
+	move_speed_mult *= item.move_speed_mult
+	if item.max_health_bonus != 0:
+		add_max_health(item.max_health_bonus)
+	if item.blanks_bonus != 0:
+		add_blanks(item.blanks_bonus)
+	item_added.emit(item)
+
+
+func has_item(item_id: StringName) -> bool:
+	for item in items:
+		if item.id == item_id:
+			return true
+	return false
 
 
 func add_coins(amount: int) -> void:

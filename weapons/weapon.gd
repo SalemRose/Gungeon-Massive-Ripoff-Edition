@@ -45,6 +45,15 @@ var _orbs: Array[OrbitOrb] = []
 var _orbit_angle: float = 0.0
 
 
+## Item multipliers from the shooter (1.0 when the shooter has none).
+func _damage_mult() -> float:
+	return shooter.damage_mult if shooter != null and "damage_mult" in shooter else 1.0
+
+
+func _rate_mult() -> float:
+	return shooter.fire_rate_mult if shooter != null and "fire_rate_mult" in shooter else 1.0
+
+
 func setup(weapon_data: WeaponData, owner_node: Node2D) -> void:
 	data = weapon_data
 	shooter = owner_node
@@ -107,7 +116,7 @@ func try_fire(muzzle_position: Vector2, aim: Vector2) -> bool:
 		return false
 
 	_shoot(muzzle_position, aim)
-	_cooldown_left = 1.0 / maxf(data.fire_rate, 0.01)
+	_cooldown_left = 1.0 / maxf(data.fire_rate * _rate_mult(), 0.01)
 	if data.fire_mode == WeaponData.FireMode.BURST and data.burst_count > 1:
 		# The rest of the burst follows by itself (see _process_burst). The next
 		# click is only possible after the whole burst plus the usual cooldown.
@@ -138,7 +147,7 @@ func release_charge(muzzle_position: Vector2, aim: Vector2) -> bool:
 	_shot_charge = amount
 	_shoot(muzzle_position, aim)
 	_shot_charge = 0.0
-	_cooldown_left = 1.0 / maxf(data.fire_rate, 0.01)
+	_cooldown_left = 1.0 / maxf(data.fire_rate * _rate_mult(), 0.01)
 	return true
 
 
@@ -168,7 +177,7 @@ func hold_beam(delta: float, muzzle_position: Vector2, aim: Vector2) -> void:
 		_beam_tick_left += maxf(data.beam_tick, 0.02)
 		for target in trace.targets:
 			if is_instance_valid(target):
-				target.take_damage(data.damage * data.beam_tick)
+				target.take_damage(data.damage * _damage_mult() * data.beam_tick)
 		fired.emit()
 	if magazine <= 0:
 		stop_beam()
@@ -269,7 +278,7 @@ func _add_orb() -> void:
 	while _orbs.size() >= data.orbit_max_orbs:
 		_orbs.pop_front().expire()
 	var orb := OrbitOrb.new()
-	orb.damage = data.damage
+	orb.damage = data.damage * _damage_mult()
 	orb.lifetime = data.orbit_duration
 	orb.color = data.color
 	orb.position = shooter.global_position   # sensible start; _process_orbs places it
@@ -323,7 +332,7 @@ func _finish_reload() -> void:
 func _spawn_bullet(origin: Vector2, direction: Vector2) -> void:
 	var scene: PackedScene = data.bullet_scene if data.bullet_scene else DEFAULT_BULLET
 	var bullet := scene.instantiate() as Bullet
-	bullet.damage = data.damage
+	bullet.damage = data.damage * _damage_mult()
 	bullet.speed = data.bullet_speed * (1.0 + randf_range(-data.speed_variance, data.speed_variance))
 	bullet.lifetime = data.bullet_lifetime
 	bullet.bounces = data.bounces
@@ -337,7 +346,7 @@ func _spawn_bullet(origin: Vector2, direction: Vector2) -> void:
 	bullet.direction = direction
 	if data.fire_mode == WeaponData.FireMode.CHARGE:
 		# 1x damage with no charge, charge_damage_multiplier x at full.
-		bullet.damage = data.damage * lerpf(1.0, data.charge_damage_multiplier, _shot_charge)
+		bullet.damage = data.damage * _damage_mult() * lerpf(1.0, data.charge_damage_multiplier, _shot_charge)
 		if _shot_charge >= 0.99:
 			bullet.pierce += data.charge_full_pierce
 	# Added next to the shooter, i.e. into the level (not under the player), so

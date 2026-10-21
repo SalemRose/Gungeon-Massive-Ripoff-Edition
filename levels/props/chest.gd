@@ -4,8 +4,9 @@ extends Node2D
 ## dropping its contents as pickups on the floor around it.
 ##
 ## `contents` is a list of [Pickup.Kind, amount] pairs, decided when the floor
-## is built (so the same seed always has the same loot). Items from the item
-## system (step 11) will become one more kind of content.
+## is built (so the same seed always has the same loot). `item` (optional) is
+## a passive item: opening the chest sets a free ItemPedestal with it next to
+## the loot.
 ##
 ##     chest.contents = [[Pickup.Kind.HEART_CONTAINER, 1]]
 ##
@@ -19,9 +20,12 @@ signal opened
 
 ## Array of [kind, amount].
 var contents: Array = [[Pickup.Kind.HEART_CONTAINER, 1]]
+## Optional passive item inside (decided at build time, like contents).
+var item: ItemData
 var is_open: bool = false
 
 const PROMPT_RANGE := 44.0
+const ITEM_PEDESTAL_SCENE: PackedScene = preload("res://levels/props/item_pedestal.tscn")
 ## How far the loot scatters from the chest.
 const SCATTER := 26.0
 
@@ -72,6 +76,11 @@ func open() -> void:
 		var spot := global_position + Vector2.from_angle(angle) * SCATTER
 		var pickup := Pickup.spawn(get_parent(), spot, contents[i][0])
 		pickup.amount = contents[i][1]
+	if item != null:
+		var pedestal := ITEM_PEDESTAL_SCENE.instantiate() as ItemPedestal
+		pedestal.item = item
+		pedestal.position = position + Vector2(0.0, 52.0)
+		get_parent().add_child(pedestal)
 	opened.emit()
 
 

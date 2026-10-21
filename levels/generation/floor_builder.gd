@@ -44,6 +44,9 @@ const TABLE_SCENE: PackedScene = preload("res://levels/props/table.tscn")
 const BOSS_SCENE: PackedScene = preload("res://entities/enemies/bosses/warden.tscn")
 const CHEST_SCENE: PackedScene = preload("res://levels/props/chest.tscn")
 const SHOP_ITEM_SCENE: PackedScene = preload("res://levels/props/shop_item.tscn")
+const ITEM_PEDESTAL_SCENE: PackedScene = preload("res://levels/props/item_pedestal.tscn")
+## Price of the passive item on offer in the shop.
+const SHOP_ITEM_PRICE := 35
 ## What the shop sells: [pickup kind, price]. Left to right on the pedestals.
 const SHOP_STOCK := [
 	[Pickup.Kind.HEART, 12],
@@ -55,6 +58,8 @@ const PILLAR_SPOTS := [Vector2(-90, -60), Vector2(90, -60), Vector2(-90, 60), Ve
 const TABLE_SPOTS := [Vector2(-150, -110), Vector2(150, -110), Vector2(-150, 110), Vector2(150, 110)]
 
 var layout: FloorLayout
+## Item ids already placed on this floor (chest / shop), to avoid duplicates.
+var _placed_items: Array = []
 ## Vector2i grid position -> Room
 var rooms: Dictionary = {}
 var corridors: Array[Corridor] = []
@@ -105,7 +110,7 @@ func _build_room(cell: FloorLayout.Cell, rng: RandomNumberGenerator) -> void:
 	if cell.type == FloorLayout.RoomType.COMBAT:
 		_add_props(room, rng)
 	elif cell.type == FloorLayout.RoomType.SHOP:
-		_add_shop_stock(room)
+		_add_shop_stock(room, rng)
 	elif cell.type == FloorLayout.RoomType.TREASURE:
 		_add_chest(room, rng)
 	rooms[cell.grid_pos] = room
@@ -133,12 +138,21 @@ func _make_waves(rng: RandomNumberGenerator) -> Array[RoomWave]:
 
 
 ## Pedestals in a row above the room's middle line, clear of the doorways.
-func _add_shop_stock(room: Room) -> void:
+func _add_shop_stock(room: Room, rng: RandomNumberGenerator) -> void:
+	# One extra pedestal: a random passive item.
+	var offered := _roll_item(rng)
+	var slots := SHOP_STOCK.size() + (1 if offered != null else 0)
+	if offered != null:
+		var ped := ITEM_PEDESTAL_SCENE.instantiate() as ItemPedestal
+		ped.item = offered
+		ped.price = SHOP_ITEM_PRICE
+		ped.position = Vector2((SHOP_STOCK.size() - (slots - 1) * 0.5) * 80.0, -45.0)
+		room.add_child(ped)
 	for i in SHOP_STOCK.size():
 		var item := SHOP_ITEM_SCENE.instantiate() as ShopItem
 		item.kind = SHOP_STOCK[i][0]
 		item.price = SHOP_STOCK[i][1]
-		item.position = Vector2((i - (SHOP_STOCK.size() - 1) * 0.5) * 80.0, -45.0)
+		item.position = Vector2((i - (slots - 1) * 0.5) * 80.0, -45.0)
 		room.add_child(item)
 
 
@@ -146,12 +160,33 @@ func _add_shop_stock(room: Room) -> void:
 ## when it is opened, so a seed always has the same treasure.
 func _add_chest(room: Room, rng: RandomNumberGenerator) -> void:
 	var chest := CHEST_SCENE.instantiate() as Chest
-	if rng.randf() < 0.5:
+	var roll := rng.randf()
+	if roll < 0.4:
+		# A passive item (stays null if every item is already taken).
+		chest.item = _roll_item(rng)
+	if chest.item != null:
+		chest.contents = [[Pickup.Kind.COIN, 5]]
+	elif roll < 0.7:
 		chest.contents = [[Pickup.Kind.HEART_CONTAINER, 1]]
 	else:
 		chest.contents = [[Pickup.Kind.BLANK, 1], [Pickup.Kind.AMMO, 1], [Pickup.Kind.COIN, 8]]
 	chest.position = Vector2(0.0, -40.0)
 	room.add_child(chest)
+
+
+## Rolls a passive item the player does not own and that is not already placed
+## on this floor, so a floor never offers the same item twice.
+func _roll_item(rng: RandomNumberGenerator) -> ItemData:
+	var exclude: Array = _placed_items.duplicate()
+	# Items carried from earlier floors. `Run` is looked up by path (not by its
+	# global name) so this script also compiles in headless test scripts.
+	var run_node := (Engine.get_main_loop() as SceneTree).root.get_node_or_null("Run")
+	if run_node != null:
+		exclude.append_array(run_node.snapshot.get("items", []))
+	var item := ItemPool.roll(rng, exclude)
+	if item != null:
+		_placed_items.append(item.id)
+	return item
 
 
 func _add_props(room: Room, rng: RandomNumberGenerator) -> void:

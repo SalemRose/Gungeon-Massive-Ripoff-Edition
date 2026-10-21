@@ -1,0 +1,38 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://levels/props/item_pedestal.gd" id="1_ped"]
+
+[node name="ItemPedestal" type="Node2D"]
+script = ExtResource("1_ped")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="Pedestal" type="Polygon2D" parent="Visual"]
+color = Color(0.25, 0.25, 0.4, 1)
+polygon = PackedVector2Array(-14, 0, 14, 0, 14, 10, -14, 10)
+
+[node name="PriceLabel" type="Label" parent="."]
+offset_left = -20.0
+offset_top = 11.0
+offset_right = 20.0
+offset_bottom = 29.0
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+
+[node name="NameLabel" type="Label" parent="."]
+offset_left = -50.0
+offset_top = -44.0
+offset_right = 50.0
+offset_bottom = -28.0
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+
+[node name="Prompt" type="Label" parent="."]
+visible = false
+offset_left = -10.0
+offset_top = -58.0
+offset_right = 10.0
+offset_bottom = -40.0
+theme_override_font_sizes/font_size = 13
+text = "E"
+horizontal_alignment = 1

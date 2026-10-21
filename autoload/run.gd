@@ -61,6 +61,7 @@ func capture(player: Player) -> Dictionary:
 		"coins": player.coins,
 		"weapon_index": player.weapon_manager.current_index,
 		"guns": guns,
+		"items": player.items.map(func(i: ItemData): return i.id),
 	}
 
 
@@ -77,6 +78,15 @@ func apply(player: Player) -> void:
 		weapons[i].magazine = snapshot["guns"][i]["magazine"]
 		weapons[i].reserve = snapshot["guns"][i]["reserve"]
 	player.weapon_manager.switch_to(snapshot["weapon_index"])
+	# Items: re-register them and their multipliers. We do NOT call add_item():
+	# its flat bonuses (max health, blanks) are already inside the saved values.
+	for item_id in snapshot.get("items", []):
+		var item := ItemPool.find(item_id)
+		if item != null:
+			player.items.append(item)
+			player.damage_mult *= item.damage_mult
+			player.fire_rate_mult *= item.fire_rate_mult
+			player.move_speed_mult *= item.move_speed_mult
 	# Tell the HUD and anything else listening.
 	player.health_changed.emit(player.health, player.max_health)
 	player.blanks_changed.emit(player.blanks, player.max_blanks)
