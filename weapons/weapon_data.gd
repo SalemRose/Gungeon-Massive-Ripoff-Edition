@@ -17,6 +17,7 @@ enum FireMode {
 	BURST, ## One click fires `burst_count` quick shots in a row.
 	CHARGE,## Hold to charge, release to fire: stronger the longer you hold.
 	BEAM,  ## Hold for a continuous laser. `damage` is then damage PER SECOND.
+	ORBIT, ## Each shot adds an orb that circles the player (see the orbit_* settings).
 }
 
 @export var display_name: String = "Gun"
@@ -53,6 +54,14 @@ enum FireMode {
 @export var beam_tick: float = 0.1
 @export var beam_ammo_per_second: float = 10.0
 
+## ORBIT guns: how many orbs can circle at once (a new one replaces the oldest),
+## their distance from you, spin speed, and how long each lasts. `damage` is the
+## damage of one touch.
+@export var orbit_max_orbs: int = 4
+@export var orbit_radius: float = 46.0
+@export var orbit_speed_degrees: float = 260.0
+@export var orbit_duration: float = 7.0
+
 @export_group("Bullet")
 ## Leave empty to use the default bullet. Set it later for guns with their own
 ## bullet art or behaviour.
@@ -71,6 +80,10 @@ enum FireMode {
 ## (0 = flies straight). Only enemies within `homing_range` pixels are chased.
 @export var homing_turn_rate: float = 0.0
 @export var homing_range: float = 240.0
+## BOOMERANG: seconds the bullet flies away before turning back to you (0 = a
+## normal bullet). It hurts enemies on the way out AND on the way back, and
+## vanishes when you catch it.
+@export var boomerang_out_time: float = 0.0
 
 @export_group("Ammo")
 ## Bullets per magazine. A reload refills it from the reserve.

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://weapons/weapon_data.gd" id="1_wd"]
+
+[resource]
+script = ExtResource("1_wd")
+display_name = "Orbit Sphere"
+color = Color(0.6, 0.6, 1, 1)
+fire_mode = 5
+fire_rate = 3.0
+damage = 6.0
+orbit_max_orbs = 4
+orbit_radius = 46.0
+orbit_speed_degrees = 260.0
+orbit_duration = 7.0
+magazine_size = 8
+infinite_ammo = false
+max_reserve_ammo = 64
+starting_reserve_ammo = 32
+reload_time = 1.2
+screen_shake = 0.3

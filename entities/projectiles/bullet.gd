@@ -32,6 +32,11 @@ extends Node2D
 ## second, and how far away it can see one. 0 = flies straight.
 @export var homing_turn_rate: float = 0.0
 @export var homing_range: float = 240.0
+## BOOMERANG: flies out for this many seconds (0 = off), then comes back to
+## `owner_node`. See _update_boomerang().
+@export var boomerang_out_time: float = 0.0
+## Who a boomerang returns to (set by the Weapon).
+var owner_node: Node2D
 
 ## Physics layer bit for walls and other solid level geometry.
 const WORLD_MASK := 1
@@ -43,6 +48,10 @@ const ENEMY_MASK := 4
 var direction: Vector2 = Vector2.RIGHT
 
 var _age: float = 0.0
+var _boomerang_returning: bool = false
+var _boomerang_time: float = 0.0
+## Close enough to the owner to be caught (pixels).
+const BOOMERANG_CATCH_DISTANCE := 14.0
 ## Typed as Node2D (not Enemy) on purpose: Enemy already refers to Bullet, and two
 ## scripts naming each other's class make Godot fail to load them.
 var _homing_target: Node2D
@@ -79,6 +88,7 @@ func deflect(new_direction: Vector2, new_damage: float, speed_multiplier: float,
 	bounces = 0
 	pierce = 0
 	homing_turn_rate = 0.0
+	boomerang_out_time = 0.0
 	_age = 0.0
 	_ignored.clear()
 	color = new_color
@@ -106,6 +116,9 @@ func _physics_process(delta: float) -> void:
 	if _age >= lifetime:
 		queue_free()
 		return
+	if boomerang_out_time > 0.0:
+		if not _update_boomerang(delta):
+			return   # caught
 
 	if homing_turn_rate > 0.0:
 		_steer_homing(delta)
@@ -119,6 +132,34 @@ func _physics_process(delta: float) -> void:
 		global_position = to
 	else:
 		_handle_hit(hit)
+
+
+## BOOMERANG: out for boomerang_out_time, then it flies back to the owner and
+## is caught. Spins while it flies. Returns false if it was caught (and freed).
+func _update_boomerang(delta: float) -> bool:
+	_boomerang_time += delta
+	visual.rotation += delta * 18.0   # spin
+	if not _boomerang_returning and _boomerang_time >= boomerang_out_time:
+		_start_boomerang_return()
+	if _boomerang_returning:
+		if not is_instance_valid(owner_node):
+			queue_free()
+			return false
+		var to_owner := owner_node.global_position - global_position
+		if to_owner.length() <= BOOMERANG_CATCH_DISTANCE:
+			queue_free()
+			return false
+		direction = to_owner.normalized()
+	return true
+
+
+## Turn around: it can hurt every enemy again on the way back. The way back
+## ignores walls (it flies straight to you), so it never gets stuck on a corner.
+func _start_boomerang_return() -> void:
+	_boomerang_returning = true
+	_ignored.clear()
+	hit_mask &= ~WORLD_MASK
+	speed *= 1.15
 
 
 ## Turns the bullet toward the nearest reachable enemy (never faster than
@@ -170,13 +211,20 @@ func _handle_hit(hit: Dictionary) -> void:
 		var landed: bool = collider.take_damage(damage)
 		if not landed:
 			return  # e.g. the player is mid-roll: the bullet passes through
+		if boomerang_out_time > 0.0:
+			return  # a boomerang goes straight through enemies
 		if pierce > 0:
 			pierce -= 1
 			return
 		queue_free()
 		return
 
-	# Anything else is a wall.
+	# Anything else is a wall. A boomerang that hits one on the way out turns
+	# back early.
+	if boomerang_out_time > 0.0 and not _boomerang_returning:
+		_start_boomerang_return()
+		global_position += hit.normal * 0.5
+		return
 	if bounces > 0:
 		bounces -= 1
 		direction = direction.bounce(hit.normal)

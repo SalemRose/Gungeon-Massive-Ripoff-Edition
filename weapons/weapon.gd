@@ -40,6 +40,9 @@ var _beam_ammo_owed: float = 0.0
 var _beam_fx: BeamEffect
 ## Charge of the shot being fired (0 for non-charge guns).
 var _shot_charge: float = 0.0
+## ORBIT guns: the orbs currently circling (oldest first) and their shared angle.
+var _orbs: Array[OrbitOrb] = []
+var _orbit_angle: float = 0.0
 
 
 func setup(weapon_data: WeaponData, owner_node: Node2D) -> void:
@@ -53,6 +56,7 @@ func setup(weapon_data: WeaponData, owner_node: Node2D) -> void:
 func _physics_process(delta: float) -> void:
 	_cooldown_left = maxf(0.0, _cooldown_left - delta)
 	_process_burst(delta)
+	_process_orbs(delta)
 	if reloading:
 		_reload_left -= delta
 		if _reload_left <= 0.0:
@@ -211,16 +215,19 @@ func add_ammo(amount: int) -> void:
 
 ## One shot: the bullets of a single trigger pull, one ammo, then the signal.
 func _shoot(muzzle_position: Vector2, aim: Vector2) -> void:
-	var origin := Bullet.safe_spawn_position(shooter, muzzle_position)
-	var count := maxi(1, data.projectiles_per_shot)
-	for i in count:
-		# Evenly spread the bullets across the cone, centred on the aim...
-		var angle := 0.0
-		if count > 1:
-			angle = lerpf(-data.spread_degrees * 0.5, data.spread_degrees * 0.5, float(i) / float(count - 1))
-		# ...then add a little randomness to each one.
-		angle += randf_range(-data.inaccuracy_degrees, data.inaccuracy_degrees)
-		_spawn_bullet(origin, aim.rotated(deg_to_rad(angle)))
+	if data.fire_mode == WeaponData.FireMode.ORBIT:
+		_add_orb()
+	else:
+		var origin := Bullet.safe_spawn_position(shooter, muzzle_position)
+		var count := maxi(1, data.projectiles_per_shot)
+		for i in count:
+			# Evenly spread the bullets across the cone, centred on the aim...
+			var angle := 0.0
+			if count > 1:
+				angle = lerpf(-data.spread_degrees * 0.5, data.spread_degrees * 0.5, float(i) / float(count - 1))
+			# ...then add a little randomness to each one.
+			angle += randf_range(-data.inaccuracy_degrees, data.inaccuracy_degrees)
+			_spawn_bullet(origin, aim.rotated(deg_to_rad(angle)))
 
 	magazine -= 1
 	fired.emit()
@@ -254,6 +261,36 @@ func _trace_beam(origin: Vector2, aim: Vector2) -> Dictionary:
 		else:
 			break   # a wall
 	return {"end": end, "targets": targets}
+
+
+## ORBIT: adds one orb; if the limit is reached the oldest one goes.
+func _add_orb() -> void:
+	_prune_orbs()
+	while _orbs.size() >= data.orbit_max_orbs:
+		_orbs.pop_front().expire()
+	var orb := OrbitOrb.new()
+	orb.damage = data.damage
+	orb.lifetime = data.orbit_duration
+	orb.color = data.color
+	orb.position = shooter.global_position   # sensible start; _process_orbs places it
+	shooter.get_parent().add_child(orb)
+	_orbs.append(orb)
+
+
+## Keeps every orb on its place of the circle around the player, evenly spread.
+func _process_orbs(delta: float) -> void:
+	_prune_orbs()
+	if _orbs.is_empty():
+		return
+	_orbit_angle = wrapf(_orbit_angle + deg_to_rad(data.orbit_speed_degrees) * delta, 0.0, TAU)
+	for i in _orbs.size():
+		var angle := _orbit_angle + TAU * float(i) / float(_orbs.size())
+		_orbs[i].global_position = shooter.global_position + Vector2.from_angle(angle) * data.orbit_radius
+
+
+## Forgets orbs that have run out.
+func _prune_orbs() -> void:
+	_orbs = _orbs.filter(func(o): return is_instance_valid(o) and not o.is_queued_for_deletion()) as Array[OrbitOrb]
 
 
 ## The follow-up shots of a burst. They aim wherever the player aims NOW, and
@@ -293,6 +330,8 @@ func _spawn_bullet(origin: Vector2, direction: Vector2) -> void:
 	bullet.pierce = data.pierce
 	bullet.homing_turn_rate = data.homing_turn_rate
 	bullet.homing_range = data.homing_range
+	bullet.boomerang_out_time = data.boomerang_out_time
+	bullet.owner_node = shooter
 	bullet.hit_mask = PLAYER_BULLET_HIT_MASK
 	bullet.color = data.color
 	bullet.direction = direction

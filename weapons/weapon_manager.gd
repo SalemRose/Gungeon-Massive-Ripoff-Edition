@@ -62,7 +62,7 @@ func _physics_process(delta: float) -> void:
 	match current.data.fire_mode:
 		WeaponData.FireMode.AUTO:
 			wants_to_fire = Input.is_action_pressed("shoot")
-		WeaponData.FireMode.SEMI, WeaponData.FireMode.BURST:
+		WeaponData.FireMode.SEMI, WeaponData.FireMode.BURST, WeaponData.FireMode.ORBIT:
 			wants_to_fire = _shoot_buffer_left > 0.0
 
 	if not wants_to_fire:

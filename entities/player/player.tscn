@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://entities/player/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://weapons/weapon_manager.gd" id="2_wm"]
@@ -11,6 +11,8 @@
 [ext_resource type="Resource" path="res://weapons/data/burst_rifle.tres" id="9_burst"]
 [ext_resource type="Resource" path="res://weapons/data/charge_cannon.tres" id="10_charge"]
 [ext_resource type="Resource" path="res://weapons/data/beam_emitter.tres" id="11_beam"]
+[ext_resource type="Resource" path="res://weapons/data/boomerang.tres" id="12_boom"]
+[ext_resource type="Resource" path="res://weapons/data/orbit_sphere.tres" id="13_orbit"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
 radius = 8.0
@@ -50,7 +52,7 @@ polygon = PackedVector2Array(-2, 0, 3, -4, 11, 0, 3, 4)
 
 [node name="WeaponManager" type="Node" parent="."]
 script = ExtResource("2_wm")
-starting_weapons = Array[ExtResource("3_wd")]([ExtResource("4_pistol"), ExtResource("5_smg"), ExtResource("6_shotgun"), ExtResource("7_ricochet"), ExtResource("8_seeker"), ExtResource("9_burst"), ExtResource("10_charge"), ExtResource("11_beam")])
+starting_weapons = Array[ExtResource("3_wd")]([ExtResource("4_pistol"), ExtResource("5_smg"), ExtResource("6_shotgun"), ExtResource("7_ricochet"), ExtResource("8_seeker"), ExtResource("9_burst"), ExtResource("10_charge"), ExtResource("11_beam"), ExtResource("12_boom"), ExtResource("13_orbit")])
 
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(2, 2)

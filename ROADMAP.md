@@ -27,10 +27,10 @@ Working style: small segments, one at a time, each tested and delivered (changed
 19. 9b Stairs + multi-floor runs (3 floors, state carried between floors)
 20. 10a Homing gun (Seeker) + burst gun (Burst Rifle)
 21. 10b Charge gun (Charge Cannon) + beam gun (Beam Emitter)
+22. 10c Boomerang gun + orbit gun (Orbit Sphere): 10 guns in total
 
 ## Next, in order
 
-10c Boomerang gun + orbit gun \
 11a Item system \
 11b First five passive items \
 12a Save system \
