@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://weapons/weapon_data.gd" id="1_wd"]
+
+[resource]
+script = ExtResource("1_wd")
+display_name = "Beam Emitter"
+color = Color(0.4, 1, 0.8, 1)
+fire_mode = 4
+fire_rate = 1.0
+damage = 30.0
+beam_range = 320.0
+beam_tick = 0.1
+beam_ammo_per_second = 10.0
+pierce = 0
+magazine_size = 50
+infinite_ammo = false
+max_reserve_ammo = 150
+starting_reserve_ammo = 100
+reload_time = 1.6
+screen_shake = 0.4

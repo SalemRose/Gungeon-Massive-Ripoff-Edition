@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://weapons/weapon_data.gd" id="1_wd"]
+
+[resource]
+script = ExtResource("1_wd")
+display_name = "Charge Cannon"
+color = Color(1, 0.85, 0.3, 1)
+fire_mode = 3
+fire_rate = 2.0
+charge_time = 0.9
+min_charge = 0.3
+charge_damage_multiplier = 4.0
+charge_full_pierce = 2
+projectiles_per_shot = 1
+damage = 8.0
+bullet_speed = 520.0
+bullet_lifetime = 1.4
+magazine_size = 6
+infinite_ammo = false
+max_reserve_ammo = 60
+starting_reserve_ammo = 30
+reload_time = 1.5
+screen_shake = 3.0

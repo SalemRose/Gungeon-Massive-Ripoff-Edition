@@ -37,8 +37,10 @@ func _process(_delta: float) -> void:
 
 	weapon_label.text = "%s  (%d/%d)" % [weapon.data.display_name, manager.current_index + 1, manager.weapons.size()]
 	ammo_label.text = weapon.ammo_text()
-	reload_bar.visible = weapon.reloading
-	reload_bar.value = weapon.reload_progress()
+	# The same bar shows reload progress, or the charge of a charge gun.
+	var charging := weapon.charge > 0.0
+	reload_bar.visible = weapon.reloading or charging
+	reload_bar.value = weapon.charge if charging else weapon.reload_progress()
 	if weapon.reloading:
 		ammo_label.text = "RELOADING"
 

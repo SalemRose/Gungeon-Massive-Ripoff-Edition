@@ -14,7 +14,9 @@ extends Resource
 enum FireMode {
 	SEMI,  ## One shot per click. Holding the button does nothing extra.
 	AUTO,  ## Keeps firing while the button is held.
-	BURST, ## One click fires `burst_count` quick shots in a row. (Added last.)
+	BURST, ## One click fires `burst_count` quick shots in a row.
+	CHARGE,## Hold to charge, release to fire: stronger the longer you hold.
+	BEAM,  ## Hold for a continuous laser. `damage` is then damage PER SECOND.
 }
 
 @export var display_name: String = "Gun"
@@ -36,6 +38,20 @@ enum FireMode {
 ## costs one bullet of ammo. `fire_rate` then means bursts per second.
 @export var burst_count: int = 3
 @export var burst_interval: float = 0.07
+
+## CHARGE guns: seconds to reach full charge, the least charge (0..1) that still
+## fires when released, the damage multiplier at full charge (1x at zero), and
+## the extra enemies a FULL charge pierces. `fire_rate` is the delay between shots.
+@export var charge_time: float = 0.9
+@export_range(0.0, 1.0) var min_charge: float = 0.3
+@export var charge_damage_multiplier: float = 4.0
+@export var charge_full_pierce: int = 2
+
+## BEAM guns: how far it reaches, how often it damages (seconds), and how fast
+## it eats ammo (bullets per second). Holding the button is what fires it.
+@export var beam_range: float = 320.0
+@export var beam_tick: float = 0.1
+@export var beam_ammo_per_second: float = 10.0
 
 @export_group("Bullet")
 ## Leave empty to use the default bullet. Set it later for guns with their own

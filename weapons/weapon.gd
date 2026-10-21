@@ -30,6 +30,16 @@ var _reload_left: float = 0.0
 ## BURST guns: shots still to come in the current burst, and the wait for the next.
 var _burst_left: int = 0
 var _burst_timer: float = 0.0
+## CHARGE guns: 0.0 (nothing) to 1.0 (full). The HUD reads it.
+var charge: float = 0.0
+var _charging: bool = false
+## BEAM guns: true while the laser is on.
+var beaming: bool = false
+var _beam_tick_left: float = 0.0
+var _beam_ammo_owed: float = 0.0
+var _beam_fx: BeamEffect
+## Charge of the shot being fired (0 for non-charge guns).
+var _shot_charge: float = 0.0
 
 
 func setup(weapon_data: WeaponData, owner_node: Node2D) -> void:
@@ -103,9 +113,84 @@ func try_fire(muzzle_position: Vector2, aim: Vector2) -> bool:
 	return true
 
 
+## CHARGE guns: call every frame the fire button is held.
+func hold_charge(delta: float) -> void:
+	if reloading or magazine <= 0:
+		if magazine <= 0 and can_reload():
+			start_reload()
+		return
+	_charging = true
+	charge = minf(1.0, charge + delta / maxf(data.charge_time, 0.01))
+
+
+## CHARGE guns: call when the button is let go. Fires if charged enough.
+func release_charge(muzzle_position: Vector2, aim: Vector2) -> bool:
+	var amount := charge
+	var was_charging := _charging
+	_charging = false
+	charge = 0.0
+	if not was_charging or amount < data.min_charge or not can_fire():
+		return false
+	_shot_charge = amount
+	_shoot(muzzle_position, aim)
+	_shot_charge = 0.0
+	_cooldown_left = 1.0 / maxf(data.fire_rate, 0.01)
+	return true
+
+
+## BEAM guns: call every physics frame the fire button is held. Casts the laser
+## along `aim`, draws it, burns ammo, and damages what it touches every tick.
+func hold_beam(delta: float, muzzle_position: Vector2, aim: Vector2) -> void:
+	if reloading or magazine <= 0:
+		stop_beam()
+		if magazine <= 0 and can_reload():
+			start_reload()
+		return
+	beaming = true
+	var origin := Bullet.safe_spawn_position(shooter, muzzle_position)
+	var trace := _trace_beam(origin, aim)
+	if _beam_fx == null or not is_instance_valid(_beam_fx):
+		_beam_fx = BeamEffect.new()
+		shooter.get_parent().add_child(_beam_fx)
+	_beam_fx.show_beam(origin, trace.end, data.color)
+	# Ammo: a fraction per frame, whole bullets come off the magazine.
+	_beam_ammo_owed += data.beam_ammo_per_second * delta
+	while _beam_ammo_owed >= 1.0 and magazine > 0:
+		_beam_ammo_owed -= 1.0
+		magazine -= 1
+	# Damage on a timer, not every frame (the numbers would be unreadable).
+	_beam_tick_left -= delta
+	if _beam_tick_left <= 0.0:
+		_beam_tick_left += maxf(data.beam_tick, 0.02)
+		for target in trace.targets:
+			if is_instance_valid(target):
+				target.take_damage(data.damage * data.beam_tick)
+		fired.emit()
+	if magazine <= 0:
+		stop_beam()
+		if can_reload():
+			start_reload()
+
+
+func stop_beam() -> void:
+	beaming = false
+	_beam_tick_left = 0.0
+	if _beam_fx != null and is_instance_valid(_beam_fx):
+		_beam_fx.hide_beam()
+
+
+## Drops anything the gun is in the middle of (charge, beam, burst).
+func cancel_hold() -> void:
+	_charging = false
+	charge = 0.0
+	_burst_left = 0
+	stop_beam()
+
+
 func start_reload() -> void:
 	if not can_reload():
 		return
+	cancel_hold()
 	reloading = true
 	_reload_left = data.reload_time
 	reload_started.emit()
@@ -115,7 +200,7 @@ func start_reload() -> void:
 func cancel_reload() -> void:
 	reloading = false
 	_reload_left = 0.0
-	_burst_left = 0   # swapping away also drops the rest of a burst
+	cancel_hold()   # swapping away also drops a charge, a beam or the rest of a burst
 
 
 func add_ammo(amount: int) -> void:
@@ -142,6 +227,33 @@ func _shoot(muzzle_position: Vector2, aim: Vector2) -> void:
 
 	if magazine == 0 and can_reload():
 		start_reload()  # Gungeon reloads on its own when the magazine runs dry.
+
+
+## Follows the beam from `origin` along `aim`: where it ends, and every enemy
+## (or other target) it passes through. It stops at the first wall, and after
+## `pierce` extra targets.
+func _trace_beam(origin: Vector2, aim: Vector2) -> Dictionary:
+	var space := shooter.get_world_2d().direct_space_state
+	var end := origin + aim * data.beam_range
+	var targets: Array = []
+	var ignored: Array[RID] = []
+	var passes := data.pierce
+	while true:
+		var query := PhysicsRayQueryParameters2D.create(origin, origin + aim * data.beam_range, PLAYER_BULLET_HIT_MASK, ignored)
+		var hit := space.intersect_ray(query)
+		if hit.is_empty():
+			break
+		end = hit.position
+		var collider := hit.collider as Object
+		if collider != null and collider.has_method("take_damage"):
+			targets.append(collider)
+			if passes <= 0:
+				break
+			passes -= 1
+			ignored.append(hit.rid)
+		else:
+			break   # a wall
+	return {"end": end, "targets": targets}
 
 
 ## The follow-up shots of a burst. They aim wherever the player aims NOW, and
@@ -184,8 +296,15 @@ func _spawn_bullet(origin: Vector2, direction: Vector2) -> void:
 	bullet.hit_mask = PLAYER_BULLET_HIT_MASK
 	bullet.color = data.color
 	bullet.direction = direction
+	if data.fire_mode == WeaponData.FireMode.CHARGE:
+		# 1x damage with no charge, charge_damage_multiplier x at full.
+		bullet.damage = data.damage * lerpf(1.0, data.charge_damage_multiplier, _shot_charge)
+		if _shot_charge >= 0.99:
+			bullet.pierce += data.charge_full_pierce
 	# Added next to the shooter, i.e. into the level (not under the player), so
 	# bullets keep their own position when the player moves and disappear with
 	# the level when it is freed.
 	shooter.get_parent().add_child(bullet)
 	bullet.global_position = origin  # set after add_child so it is in world space
+	if data.fire_mode == WeaponData.FireMode.CHARGE:
+		bullet.visual.scale = Vector2.ONE * (1.0 + _shot_charge * 1.5)   # a charged shot looks bigger

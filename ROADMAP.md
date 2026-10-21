@@ -26,10 +26,10 @@ Working style: small segments, one at a time, each tested and delivered (changed
 18. 9a Boss base (phases) + first boss, The Warden
 19. 9b Stairs + multi-floor runs (3 floors, state carried between floors)
 20. 10a Homing gun (Seeker) + burst gun (Burst Rifle)
+21. 10b Charge gun (Charge Cannon) + beam gun (Beam Emitter)
 
 ## Next, in order
 
-10b Charge gun + beam gun \
 10c Boomerang gun + orbit gun \
 11a Item system \
 11b First five passive items \

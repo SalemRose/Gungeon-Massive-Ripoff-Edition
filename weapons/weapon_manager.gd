@@ -43,9 +43,20 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("reload"):
 		current.start_reload()
 
-	# No shooting while rolling or dead (matches Gungeon).
+	# No shooting while rolling or dead (matches Gungeon). A charge, a beam or
+	# a burst in progress is dropped.
 	if player.state != Player.State.NORMAL:
+		current.cancel_hold()
 		return
+
+	# Charge and beam guns work on holding the button, not on clicks.
+	match current.data.fire_mode:
+		WeaponData.FireMode.CHARGE:
+			_process_charge(delta)
+			return
+		WeaponData.FireMode.BEAM:
+			_process_beam(delta)
+			return
 
 	var wants_to_fire := false
 	match current.data.fire_mode:
@@ -64,6 +75,30 @@ func _physics_process(delta: float) -> void:
 
 	if current.try_fire(player.muzzle.global_position, player.aim_direction):
 		_shoot_buffer_left = 0.0
+
+
+## CHARGE: charges while held, fires on release.
+func _process_charge(delta: float) -> void:
+	if current.is_out_of_ammo():
+		if Input.is_action_pressed("shoot"):
+			_switch_to_gun_with_ammo()
+		return
+	if Input.is_action_pressed("shoot"):
+		current.hold_charge(delta)
+	else:
+		current.release_charge(player.muzzle.global_position, player.aim_direction)
+
+
+## BEAM: on while the button is held.
+func _process_beam(delta: float) -> void:
+	if not Input.is_action_pressed("shoot"):
+		current.stop_beam()
+		return
+	if current.is_out_of_ammo():
+		current.stop_beam()
+		_switch_to_gun_with_ammo()
+		return
+	current.hold_beam(delta, player.muzzle.global_position, player.aim_direction)
 
 
 ## Mouse wheel and D-pad produce one-off events, so swapping is handled here
