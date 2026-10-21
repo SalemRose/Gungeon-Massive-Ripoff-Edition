@@ -1,0 +1,39 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://levels/props/stairs.gd" id="1_stairs"]
+
+[node name="Stairs" type="Node2D"]
+script = ExtResource("1_stairs")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="Step1" type="Polygon2D" parent="Visual"]
+color = Color(0.22, 0.2, 0.28, 1)
+polygon = PackedVector2Array(-20, -16, 20, -16, 20, 16, -20, 16)
+
+[node name="Step2" type="Polygon2D" parent="Visual"]
+color = Color(0.15, 0.13, 0.2, 1)
+polygon = PackedVector2Array(-15, -10, 15, -10, 15, 12, -15, 12)
+
+[node name="Step3" type="Polygon2D" parent="Visual"]
+color = Color(0.07, 0.06, 0.1, 1)
+polygon = PackedVector2Array(-10, -4, 10, -4, 10, 8, -10, 8)
+
+[node name="Caption" type="Label" parent="."]
+offset_left = -30.0
+offset_top = 18.0
+offset_right = 30.0
+offset_bottom = 36.0
+theme_override_font_sizes/font_size = 11
+text = "DOWN"
+horizontal_alignment = 1
+
+[node name="Prompt" type="Label" parent="."]
+visible = false
+offset_left = -10.0
+offset_top = -40.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_font_sizes/font_size = 13
+text = "E"
+horizontal_alignment = 1

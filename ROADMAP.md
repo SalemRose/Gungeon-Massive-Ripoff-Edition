@@ -24,10 +24,10 @@ Working style: small segments, one at a time, each tested and delivered (changed
 16. 8c Shop room
 17. 8d Treasure room (chest, heart containers)
 18. 9a Boss base (phases) + first boss, The Warden
+19. 9b Stairs + multi-floor runs (3 floors, state carried between floors)
 
 ## Next, in order
 
-9b Stairs + multi-floor runs \
 10a-c Six more guns (homing, burst, charge, beam, boomerang, orbit) \
 11a Item system \
 11b First five passive items \
@@ -47,4 +47,5 @@ Working style: small segments, one at a time, each tested and delivered (changed
 - Draw order follows tree order: floor node before the player, corridors under the rooms (z_index -1) so they don't hide the doors
 - Main scene is now levels/floor_level/floor_level.tscn (generated floors); test_level is the old hand-built one
 - Interactables (tables, shop items, chests) join the "interactables" group and provide can_interact / interact / get_prompt
+- `Run` (autoload) holds the run: seed, floor, and the player snapshot carried between floors; fixed-seed floor levels ignore it (tests/debug)
 - A new boss = a scene inheriting enemy.tscn with boss.gd plus BossPhase .tres files (no new code)
