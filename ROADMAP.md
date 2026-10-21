@@ -1,8 +1,28 @@
 # Gungeon Massive Ripoff Edition: roadmap and status
 
-Full version lives in the repo as ROADMAP.md. Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` node). Code layout: entities/, weapons/, levels/, ui/, autoload/.
+Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` node). Code layout: entities/, weapons/, levels/, ui/, autoload/.
 
-Working style: small segments, one at a time, each tested and delivered (changed files only) before the next. Push to GitHub only when the user says so.
+## Standing instructions (from the project)
+
+- Do not send any unmodified file (we save bandwidth): every delivery is a zip of ONLY new/changed files
+- Always add notation (comments) to the scripts provided, for learning reasons
+- Push to GitHub only when the user says so (the stop hook asking to push is declined each time)
+- Keep reasoning efficient: achieve as much as possible in one day
+- Explain briefly and efficiently what was done in every step
+
+## Working style
+
+- Small segments, strictly in order, one at a time; the user says "next" to advance
+- Each segment: implement, test (headless), commit locally, zip changed files, send, brief explanation, update this roadmap
+- Screenshots are internal checks only, never sent
+- The user's own ROADMAP.txt (main menu and settings wishes) is theirs: do not touch it
+- Local commits not yet pushed: 9b, 10a, 10b, 10c, 11a (last pushed: ROADMAP.md update)
+
+## Game summary
+
+- Roguelite (not roguelike) in the style of Enter the Gungeon: connected-room floors (start, combat, shop, treasure, boss), 3 floors per run, bullet-hell gunplay, last-resort melee, blanks, flippable tables, limited ammo with an infinite starter pistol
+- Roguelite meta: hub and permanent unlocks (steps 12a-12c)
+- Keyboard/mouse and gamepad; placeholder art everywhere, swappable because everything visible is under a `Visual` node
 
 ## Done
 
@@ -52,3 +72,14 @@ Working style: small segments, one at a time, each tested and delivered (changed
 - `Run` (autoload) holds the run: seed, floor, and the player snapshot carried between floors; fixed-seed floor levels ignore it (tests/debug)
 - A new boss = a scene inheriting enemy.tscn with boss.gd plus BossPhase .tres files (no new code)
 - A new passive item = an ItemData .tres in items/data/ (stat multipliers + flat bonuses, no code); chests and the shop pick it up automatically
+- Weapons are data: WeaponData .tres with fire modes SEMI, AUTO, BURST, CHARGE, BEAM, ORBIT plus homing/boomerang settings; a new gun = a new .tres (10 guns exist, all in player.tscn starting_weapons until the item system hands them out)
+- Universal damage interface: `take_damage(amount) -> bool`; groups: player, bullets, enemies, rooms, interactables, bosses, orbit_orbs
+- Floors are seeded: FloorGenerator.generate(seed, floor) -> FloorLayout, FloorBuilder.build(layout); same seed = same floor and loot. floor_level follows `Run` when seed_value == 0
+- Enemy pathfinding: AStarGrid2D per Room (16 px cells), refreshed every 1.5 s
+- Balance: boss The Warden 320 HP, phases at 100/60/30%, drops heart container + heart + 12 coins; shop prices heart 12, ammo 15, blank 20, item 35; chests: 40% item, 30% heart container, 30% blank+ammo+8 coins
+- Item multipliers (damage, fire rate, move speed) live on the Player and are read by guns; Run snapshot stores item ids
+- Bullet and Enemy scripts must not name each other's class (circular load): Bullet uses duck typing
+- Never share shape resources between nodes
+- Autoloads (`Run`) are not visible by name in headless test scripts: look up with root.get_node("Run"); scripts that must also compile there use get_node_or_null
+- Testing: Godot headless `--script` tests extend SceneTree (22 suites, all passing; kept outside the repo); redirect output to a file, wait for process frames for HUD checks
+- Known rough edges: beam damage numbers spam each tick; boss has the same stats on every floor; player starts with all 10 guns; HUD does not show owned items yet; run restarts immediately after victory or death until the hub exists
