@@ -16,7 +16,7 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 - Each segment: implement, test (headless), commit locally, zip changed files, send, brief explanation, update this roadmap
 - Screenshots are internal checks only, never sent
 - The user's own ROADMAP.txt (main menu and settings wishes) is theirs: do not touch it
-- Local commits not yet pushed: 9b, 10a, 10b, 10c, 11a, roadmap (last pushed: ROADMAP.md update)
+- Local commits not yet pushed: 9b, 10a, 10b, 10c, 11a, 11b, roadmap (last pushed: ROADMAP.md update)
 
 ## Game summary
 
@@ -49,10 +49,10 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 21. 10b Charge gun (Charge Cannon) + beam gun (Beam Emitter)
 22. 10c Boomerang gun + orbit gun (Orbit Sphere): 10 guns in total
 23. 11a Item system: ItemData resources (stat multipliers + flat bonuses), ItemPool, item pedestal; items appear in treasure chests and the shop, carry between floors
+24. 11b First five passive items: Quick Boots, Rapid Trigger, Heart Locket, Blank Satchel, Sharp Rounds (plus Heavy Rounds from 11a = 6 items)
 
 ## Next, in order
 
-11b First five passive items \
 12a Save system \
 12b Permanent currency/unlocks \
 12c Hub scene \
