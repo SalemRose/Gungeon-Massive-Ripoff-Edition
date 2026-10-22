@@ -12,7 +12,7 @@ extends Node
 ##     Run.reset()                   # run over (death or victory)
 ##
 ## Permanent progress between runs (unlocks, hub currency) is NOT here: that is
-## the save system, step 12.
+## the SaveData autoload (end_run() hands it the result of each run).
 
 const FLOORS_PER_RUN := 3
 
@@ -40,6 +40,18 @@ func is_last_floor() -> bool:
 func advance(player: Player) -> void:
 	snapshot = capture(player)
 	floor_index += 1
+
+
+## Ends a run that was really played: records it in the permanent save
+## (SaveData), then resets. Fixed-seed floors (tests / debug) have no run, so
+## nothing is recorded for them. `SaveData` is looked up by path so this script
+## also compiles in headless test scripts.
+func end_run(victory: bool) -> void:
+	if active:
+		var save_node := get_node_or_null("/root/SaveData")
+		if save_node != null:
+			save_node.record_run(victory, floor_index + 1)
+	reset()
 
 
 ## Ends the run. The next floor level starts a fresh one.

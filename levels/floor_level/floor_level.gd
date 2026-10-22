@@ -134,7 +134,7 @@ func descend() -> void:
 	_leaving = true
 	if Run.is_last_floor():
 		FloatingText.spawn(self, player.global_position + Vector2(0.0, -30.0), "RUN COMPLETE!", Color(1.0, 0.9, 0.4), 16)
-		Run.reset()   # a hub / results screen will go here (step 12)
+		Run.end_run(true)   # a hub / results screen will go here (step 12c)
 	else:
 		Run.advance(player)
 	if fade_time > 0.0:
@@ -146,7 +146,7 @@ func descend() -> void:
 
 func _on_player_died() -> void:
 	await get_tree().create_timer(1.5).timeout
-	Run.reset()   # dying ends the run
+	Run.end_run(false)   # dying ends the run (recorded in the save)
 	_reload()
 
 

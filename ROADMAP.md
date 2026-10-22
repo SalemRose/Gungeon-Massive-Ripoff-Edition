@@ -16,7 +16,7 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 - Each segment: implement, test (headless), commit locally, zip changed files, send, brief explanation, update this roadmap
 - Screenshots are internal checks only, never sent
 - The user's own ROADMAP.txt (main menu and settings wishes) is theirs: do not touch it
-- Local commits not yet pushed: 9b, 10a, 10b, 10c, 11a, 11b, roadmap (last pushed: ROADMAP.md update)
+- Local commits not yet pushed: 9b, 10a, 10b, 10c, 11a, 11b, 12a, roadmap (last pushed: ROADMAP.md update)
 
 ## Game summary
 
@@ -50,10 +50,10 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 22. 10c Boomerang gun + orbit gun (Orbit Sphere): 10 guns in total
 23. 11a Item system: ItemData resources (stat multipliers + flat bonuses), ItemPool, item pedestal; items appear in treasure chests and the shop, carry between floors
 24. 11b First five passive items: Quick Boots, Rapid Trigger, Heart Locket, Blank Satchel, Sharp Rounds (plus Heavy Rounds from 11a = 6 items)
+25. 12a Save system: SaveData autoload (versioned JSON in user://save.json, safe writes, corrupt-file backup, unlocks, currency, run stats); Run.end_run() records each finished run
 
 ## Next, in order
 
-12a Save system \
 12b Permanent currency/unlocks \
 12c Hub scene \
 13a Main menu \
@@ -83,3 +83,4 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 - Autoloads (`Run`) are not visible by name in headless test scripts: look up with root.get_node("Run"); scripts that must also compile there use get_node_or_null
 - Testing: Godot headless `--script` tests extend SceneTree (22 suites, all passing; kept outside the repo); redirect output to a file, wait for process frames for HUD checks
 - Known rough edges: beam damage numbers spam each tick; boss has the same stats on every floor; player starts with all 10 guns; HUD does not show owned items yet; run restarts immediately after victory or death until the hub exists
+- `SaveData` (autoload) is the PERMANENT save (currency, unlocks, stats, settings); `Run` is the temporary run state. Add a new saved value by adding a key to SaveData.DEFAULTS; bump VERSION and fill _migrate() if a format ever changes
