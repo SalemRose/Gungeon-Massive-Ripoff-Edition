@@ -15,6 +15,10 @@ extends Node
 ## the SaveData autoload (end_run() hands it the result of each run).
 
 const FLOORS_PER_RUN := 3
+## Hub currency rules (see reward_for).
+const BASE_REWARD := 5
+const FLOOR_REWARD := 10
+const VICTORY_REWARD := 30
 
 ## True once a run has started (the first floor level starts one by itself).
 var active: bool = false
@@ -22,6 +26,8 @@ var run_seed: int = 0
 var floor_index: int = 0
 ## What the player carried out of the previous floor. Empty on floor 0.
 var snapshot: Dictionary = {}
+## Hub currency the last finished run paid out (the results screen shows it).
+var last_reward: int = 0
 
 
 ## Begins a run. Pass a seed to repeat a run, or leave 0 for a random one.
@@ -46,12 +52,23 @@ func advance(player: Player) -> void:
 ## (SaveData), then resets. Fixed-seed floors (tests / debug) have no run, so
 ## nothing is recorded for them. `SaveData` is looked up by path so this script
 ## also compiles in headless test scripts.
-func end_run(victory: bool) -> void:
+func end_run(victory: bool, player: Player = null) -> void:
+	last_reward = 0
 	if active:
 		var save_node := get_node_or_null("/root/SaveData")
 		if save_node != null:
 			save_node.record_run(victory, floor_index + 1)
+			last_reward = reward_for(victory, floor_index, player.coins if player != null else 0)
+			save_node.add_to("currency", last_reward)
 	reset()
+
+
+## Hub currency earned by a run. Rewards progress even when you die:
+## a base amount, a bonus per floor you fully cleared, a bonus for winning,
+## and half of the coins you were still carrying (coins are otherwise lost).
+static func reward_for(victory: bool, floor_index_reached: int, coins_left: int) -> int:
+	var floors_cleared := floor_index_reached + (1 if victory else 0)
+	return BASE_REWARD + floors_cleared * FLOOR_REWARD + (VICTORY_REWARD if victory else 0) + coins_left / 2
 
 
 ## Ends the run. The next floor level starts a fresh one.

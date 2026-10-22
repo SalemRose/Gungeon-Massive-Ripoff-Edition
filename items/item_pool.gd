@@ -42,7 +42,8 @@ static func find(item_id: StringName) -> ItemData:
 static func roll(rng: RandomNumberGenerator, exclude: Array = []) -> ItemData:
 	var candidates: Array[ItemData] = []
 	for item in all():
-		if not exclude.has(item.id):
+		# Skip items already owned/placed and items not unlocked in the hub yet.
+		if not exclude.has(item.id) and UnlockCatalog.is_available(UnlockData.Kind.ITEM, item.id):
 			candidates.append(item)
 	if candidates.is_empty():
 		return null

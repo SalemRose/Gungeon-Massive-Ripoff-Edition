@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="UnlockData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://unlocks/unlock_data.gd" id="1_unlock"]
+
+[resource]
+script = ExtResource("1_unlock")
+id = &"gun_seeker"
+display_name = "Seeker"
+description = "Homing bullets"
+cost = 30
+kind = 0
+target = &"seeker"

@@ -27,7 +27,10 @@ var _shoot_buffer_left: float = 0.0
 
 func _ready() -> void:
 	for data in starting_weapons:
-		add_weapon(data)
+		# Guns the player has not unlocked yet are skipped (the Pistol has no
+		# unlock entry, so it is always there). See unlocks/unlock_catalog.gd.
+		if UnlockCatalog.is_available(UnlockData.Kind.GUN, UnlockCatalog.gun_id(data)):
+			add_weapon(data)
 	if not weapons.is_empty():
 		switch_to(0)
 
