@@ -16,6 +16,8 @@ extends Node2D
 ## (only happens when a test drives the level directly).
 signal reload_requested
 
+const HUB_SCENE := "res://levels/hub/hub.tscn"
+
 @onready var player: Player = $Player
 @onready var debug_label: Label = $DebugLayer/DebugLabel
 
@@ -134,20 +136,35 @@ func descend() -> void:
 	_leaving = true
 	if Run.is_last_floor():
 		FloatingText.spawn(self, player.global_position + Vector2(0.0, -30.0), "RUN COMPLETE!", Color(1.0, 0.9, 0.4), 16)
-		Run.end_run(true, player)   # a hub / results screen will go here (step 12c)
+		Run.end_run(true, player)   # pays the run reward into the save
 	else:
 		Run.advance(player)
 	if fade_time > 0.0:
 		var tween := create_tween()
 		tween.tween_property(_fade, "color:a", 1.0, fade_time)
 		await tween.finished
-	_reload()
+	if _uses_run and not Run.active:
+		_go_to_hub()   # the run is over
+	else:
+		_reload()
 
 
 func _on_player_died() -> void:
 	await get_tree().create_timer(1.5).timeout
 	Run.end_run(false, player)   # dying ends the run (recorded in the save)
-	_reload()
+	if _uses_run:
+		_go_to_hub()
+	else:
+		_reload()
+
+
+## After a run ends (victory or death) the player returns to the hub. Like
+## _reload(), it only emits `reload_requested` when a test drives the level.
+func _go_to_hub() -> void:
+	if get_tree().current_scene != null:
+		get_tree().change_scene_to_file(HUB_SCENE)
+	else:
+		reload_requested.emit()
 
 
 func _reload() -> void:

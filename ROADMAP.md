@@ -16,7 +16,7 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 - Each segment: implement, test (headless), commit locally, zip changed files, send, brief explanation, update this roadmap
 - Screenshots are internal checks only, never sent
 - The user's own ROADMAP.txt (main menu and settings wishes) is theirs: do not touch it
-- Local commits not yet pushed: 9b, 10a, 10b, 10c, 11a, 11b, 12a, 12b, roadmap (last pushed: ROADMAP.md update)
+- Local commits not yet pushed: 9b, 10a, 10b, 10c, 11a, 11b, 12a, 12b, 12c, roadmap (last pushed: ROADMAP.md update)
 
 ## Game summary
 
@@ -52,10 +52,10 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 24. 11b First five passive items: Quick Boots, Rapid Trigger, Heart Locket, Blank Satchel, Sharp Rounds (plus Heavy Rounds from 11a = 6 items)
 25. 12a Save system: SaveData autoload (versioned JSON in user://save.json, safe writes, corrupt-file backup, unlocks, currency, run stats); Run.end_run() records each finished run
 26. 12b Permanent currency/unlocks: runs pay hub currency (5 + 10 per floor cleared + 30 for winning + half your leftover coins); UnlockData/UnlockCatalog lock 6 guns and 3 items until bought (Pistol, SMG, Shotgun, Ricochet and the other items are free)
+27. 12c Hub scene: new main scene; DUNGEON door starts a run, UNLOCKS terminal opens the shop (mouse, keyboard, gamepad); winning or dying returns to the hub and shows what the run paid
 
 ## Next, in order
 
-12c Hub scene \
 13a Main menu \
 13b Settings (resolutions, fullscreen, music/sfx volume) \
 13c Pause menu \
@@ -67,7 +67,7 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 - Position nodes BEFORE add_child when spawning bodies
 - Add enum values at the END
 - Draw order follows tree order: floor node before the player, corridors under the rooms (z_index -1) so they don't hide the doors
-- Main scene is now levels/floor_level/floor_level.tscn (generated floors); test_level is the old hand-built one
+- levels/floor_level/floor_level.tscn is the generated dungeon floor; test_level is the old hand-built one
 - Interactables (tables, shop items, chests) join the "interactables" group and provide can_interact / interact / get_prompt
 - `Run` (autoload) holds the run: seed, floor, and the player snapshot carried between floors; fixed-seed floor levels ignore it (tests/debug)
 - A new boss = a scene inheriting enemy.tscn with boss.gd plus BossPhase .tres files (no new code)
@@ -82,6 +82,7 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 - Never share shape resources between nodes
 - Autoloads (`Run`) are not visible by name in headless test scripts: look up with root.get_node("Run"); scripts that must also compile there use get_node_or_null
 - Testing: Godot headless `--script` tests extend SceneTree (22 suites, all passing; kept outside the repo); redirect output to a file, wait for process frames for HUD checks
-- Known rough edges: beam damage numbers spam each tick; boss has the same stats on every floor; player starts with all 10 guns; HUD does not show owned items yet; run restarts immediately after victory or death until the hub exists
+- Known rough edges: beam damage numbers spam each tick; boss has the same stats on every floor; player starts with all 10 guns; HUD does not show owned items yet; no results screen yet (the hub just shows what the last run paid)
 - `SaveData` (autoload) is the PERMANENT save (currency, unlocks, stats, settings); `Run` is the temporary run state. Add a new saved value by adding a key to SaveData.DEFAULTS; bump VERSION and fill _migrate() if a format ever changes
 - A new unlock = an UnlockData .tres in unlocks/data/ pointing at a gun (file name in weapons/data/) or an item id; without an entry a gun/item is free from the start. Dev switch: run the game or tests with `-- --unlock-all`; the older test suites need it, test_unlocks must run without it
+- Main scene is now levels/hub/hub.tscn; floor_level goes back to the hub when a real run ends (fixed-seed test floors still just reload). HubStation = a usable thing in the hub (door, terminal); UnlockShop = the unlock screen (pauses the game while open)
