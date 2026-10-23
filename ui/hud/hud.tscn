@@ -74,6 +74,16 @@ theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
 theme_override_font_sizes/font_size = 14
 text = "Coins: 0"
 
+[node name="SalveLabel" type="Label" parent="Root"]
+layout_mode = 0
+offset_left = 168.0
+offset_top = 64.0
+offset_right = 280.0
+offset_bottom = 87.0
+theme_override_colors/font_color = Color(0.5, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 14
+text = "Salves: 1 [G]"
+
 [node name="ReloadBar" type="ProgressBar" parent="Root"]
 visible = false
 layout_mode = 0

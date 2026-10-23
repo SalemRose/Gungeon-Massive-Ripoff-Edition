@@ -17,7 +17,7 @@ extends Area2D
 signal collected(kind: int)
 
 ## Add new kinds at the END.
-enum Kind { HEART, AMMO, BLANK, COIN, HEART_CONTAINER }
+enum Kind { HEART, AMMO, BLANK, COIN, HEART_CONTAINER, SALVE }
 
 const SCENE: PackedScene = preload("res://entities/pickups/pickup.tscn")
 const PLAYER_GROUP := "player"
@@ -124,6 +124,8 @@ static func is_useful(player: Player, pickup_kind: int) -> bool:
 			return player.weapon_manager.weapons.any(func(w): return not w.data.infinite_ammo and w.reserve < w.data.max_reserve_ammo)
 		Kind.BLANK:
 			return player.blanks < player.max_blanks
+		Kind.SALVE:
+			return player.salves < player.max_salves
 		Kind.COIN, Kind.HEART_CONTAINER:
 			return true
 	return false
@@ -150,6 +152,9 @@ static func apply_effect(player: Player, pickup_kind: int, count: int = 1, fract
 		Kind.HEART_CONTAINER:
 			player.add_max_health(2 * count)
 			return {"label": "MAX HP UP", "color": Color(1.0, 0.5, 0.6)}
+		Kind.SALVE:
+			player.add_salves(count)
+			return {"label": "+SALVE", "color": Color(0.5, 1.0, 0.6)}
 	return {"label": "", "color": Color.WHITE}
 
 
@@ -194,4 +199,7 @@ static func make_icon(pickup_kind: int) -> Polygon2D:
 		Kind.HEART_CONTAINER:
 			polygon.color = Color(1.0, 0.45, 0.55)
 			polygon.polygon = PackedVector2Array([Vector2(0, 10), Vector2(-11, -1), Vector2(-7, -8), Vector2(0, -4), Vector2(7, -8), Vector2(11, -1)])
+		Kind.SALVE:
+			polygon.color = Color(0.4, 0.9, 0.5)
+			polygon.polygon = PackedVector2Array([Vector2(-4, -8), Vector2(4, -8), Vector2(4, -4), Vector2(7, 0), Vector2(7, 7), Vector2(-7, 7), Vector2(-7, 0), Vector2(-4, -4)])
 	return polygon

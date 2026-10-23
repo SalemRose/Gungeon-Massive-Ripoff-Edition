@@ -13,6 +13,7 @@ extends CanvasLayer
 @onready var blank_label: Label = $Root/BlankLabel
 @onready var coin_label: Label = $Root/CoinLabel
 @onready var room_label: Label = $RoomLabel
+@onready var salve_label: Label = $Root/SalveLabel
 
 var _player: Player
 
@@ -29,6 +30,7 @@ func _process(_delta: float) -> void:
 	health_label.text = "%d / %d" % [_player.health, _player.max_health]
 	blank_label.text = "Blanks: %d" % _player.blanks
 	coin_label.text = "Coins: %d" % _player.coins
+	salve_label.text = "Salves: %d [G]" % _player.salves
 
 	var manager := _player.weapon_manager
 	var weapon := manager.current

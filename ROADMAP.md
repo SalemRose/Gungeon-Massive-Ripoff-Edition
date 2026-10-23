@@ -16,7 +16,7 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 - Each segment: implement, test (headless), commit locally, zip changed files, send, brief explanation, update this roadmap
 - Screenshots are internal checks only, never sent
 - The user's own ROADMAP.txt (main menu and settings wishes) is theirs: do not touch it
-- Local commits not yet pushed: 9b, 10a, 10b, 10c, 11a, 11b, 12a, 12b, 12c, 13a, 13b, 13c, roadmap (last pushed: ROADMAP.md update)
+- Local commits not yet pushed: 9b, 10a, 10b, 10c, 11a, 11b, 12a, 12b, 12c, 13a, 13b, 13c, salve, roadmap (last pushed: ROADMAP.md update)
 
 ## Game summary
 
@@ -56,6 +56,7 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 28. 13a Main menu: title, New Game (asks before erasing progress), Load (greyed out without a save), Settings (placeholder until 13b), Quit; new main scene
 29. 13b Settings: resolution (5 standard 16:9 sizes), fullscreen toggle, music and sfx volume; saved, applied at startup, kept when you start a New Game; Music and SFX audio buses ready for when sounds exist
 30. 13c Pause menu: Esc / Start in the hub and the dungeon; Resume, Settings, Abandon Run (dungeon only, counts as a lost run and pays), Main Menu
+31. Salve (extra): a carried heal. Press G / gamepad B to drink one (+1 heart); start with 1, carry up to 3; sold in the shop for 18; carried between floors; shown in the HUD
 
 ## Next, in order
 
@@ -90,3 +91,4 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 - GameSettings (autoload) applies and saves the options; SettingsMenu is a reusable overlay (main menu now, pause menu in 13c). When adding sounds, set each AudioStreamPlayer's bus to "Music" or "SFX"
 - UI layout gotcha: use set_anchors_and_offsets_preset (not set_anchors_preset) to make a Control fill its parent
 - PauseMenu is a CanvasLayer each level adds itself (allow_abandon true in the dungeon); it ignores the pause key while another screen (unlock shop, settings) is open or the player is dead
+- Controls: Q / LB blank, G / B salve, F / RB melee, R / X reload, E / Y interact, Space / A dodge, Esc / Start pause

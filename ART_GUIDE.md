@@ -27,6 +27,7 @@ Pixel art: in Project Settings -> Rendering -> Textures set the default filter t
 | Player bullet | `entities/projectiles/bullet.tscn` -> Visual | 9x5 | `assets/ITEMS/WEAPONS` |
 | Enemy bullet | `entities/projectiles/enemy_bullet.tscn` -> Visual | 8x8 | `assets/ITEMS/WEAPONS` |
 | Pickups (heart, ammo, blank, coin, heart container) | `entities/pickups/pickup.tscn`; icons come from `Pickup.make_icon()` in `pickup.gd` | ~12x12 | `assets/ITEMS/CONSUMABLES` |
+| Pickups also include the salve (`Pickup.Kind.SALVE`, green flask shape in `Pickup.make_icon`) | same scene | ~14x15 | `assets/ITEMS/CONSUMABLES` |
 | Chest | `levels/props/chest.tscn` -> Visual/Body, Lid | body 28x12, lid 30x7 | `assets/SPACES/ARENA` |
 | Shop / item pedestal | `shop_item.tscn`, `item_pedestal.tscn` -> Visual/Pedestal | 28x10 | `assets/SPACES/ARENA` |
 | Stairs | `levels/props/stairs.tscn` -> Visual/Step1-3 | 40x32 | `assets/SPACES/ARENA` |

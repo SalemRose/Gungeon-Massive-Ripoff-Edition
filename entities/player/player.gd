@@ -20,6 +20,7 @@ extends CharacterBody2D
 signal health_changed(current: int, maximum: int)
 signal rolled(direction: Vector2)
 signal blanks_changed(current: int, maximum: int)
+signal salves_changed(current: int, maximum: int)
 ## The coin purse changed (picked up, or spent in a shop).
 signal coins_changed(current: int)
 ## A melee swing began, aimed along `direction`.
@@ -65,6 +66,15 @@ enum State { NORMAL, ROLLING, DEAD, MELEE }
 @export_group("Blank")
 @export var starting_blanks: int = 2
 @export var max_blanks: int = 5
+
+@export_group("Salve")
+## A salve is a carried heal: press G / gamepad B to drink one.
+@export var starting_salves: int = 1
+@export var max_salves: int = 3
+## Half-hearts restored per salve (2 = one heart).
+@export var salve_heal: int = 2
+## Stops a double-tap from wasting two salves.
+@export var salve_cooldown: float = 0.6
 ## Bullets inside this distance are destroyed (about one screen).
 @export var blank_radius: float = 420.0
 ## Enemy push speed at the player's feet (weaker farther away).
@@ -130,6 +140,8 @@ var _roll_cooldown_left: float = 0.0
 var _roll_buffer_left: float = 0.0
 var _hurt_iframes_left: float = 0.0
 var blanks: int
+var salves: int
+var _salve_cooldown_left: float = 0.0
 ## Passive items taken this run. Their stat effects are folded into the three
 ## multipliers below by add_item(); guns and movement read those.
 var items: Array[ItemData] = []
@@ -165,6 +177,8 @@ func _ready() -> void:
 	health = max_health
 	health_changed.emit(health, max_health)
 	blanks = mini(starting_blanks, max_blanks)
+	salves = mini(starting_salves, max_salves)
+	salves_changed.emit(salves, max_salves)
 	blanks_changed.emit(blanks, max_blanks)
 
 
@@ -210,11 +224,14 @@ func _tick_timers(delta: float) -> void:
 	_blank_iframes_left = maxf(0.0, _blank_iframes_left - delta)
 	_blank_cooldown_left = maxf(0.0, _blank_cooldown_left - delta)
 	_melee_cooldown_left = maxf(0.0, _melee_cooldown_left - delta)
+	_salve_cooldown_left = maxf(0.0, _salve_cooldown_left - delta)
 
 	if Input.is_action_just_pressed("dodge"):
 		_roll_buffer_left = roll_buffer_time
 	if Input.is_action_just_pressed("blank"):
 		use_blank()
+	if Input.is_action_just_pressed("salve"):
+		use_salve()
 	if Input.is_action_just_pressed("interact") and state == State.NORMAL:
 		try_interact()
 	if Input.is_action_just_pressed("melee"):
@@ -482,6 +499,28 @@ func add_max_health(amount: int) -> void:
 	max_health += amount
 	health = mini(max_health, health + amount)
 	health_changed.emit(health, max_health)
+
+
+## Drinks one salve: heals `salve_heal` half-hearts. Does nothing (and keeps the
+## salve) if you have none, are at full health, are dead, or just drank one.
+## Works mid-roll or mid-swing. Returns true if a salve was used.
+func use_salve() -> bool:
+	if salves <= 0 or state == State.DEAD or health >= max_health or _salve_cooldown_left > 0.0:
+		return false
+	salves -= 1
+	_salve_cooldown_left = salve_cooldown
+	heal(salve_heal)
+	salves_changed.emit(salves, max_salves)
+	FloatingText.spawn(get_parent(), global_position + Vector2(0.0, -26.0), "SALVE", Color(0.5, 1.0, 0.6), 10)
+	return true
+
+
+## Adds salves (up to max_salves). Returns how many were really added.
+func add_salves(amount: int) -> int:
+	var before := salves
+	salves = clampi(salves + amount, 0, max_salves)
+	salves_changed.emit(salves, max_salves)
+	return salves - before
 
 
 ## Gives the player a passive item: remembers it and applies its effects.

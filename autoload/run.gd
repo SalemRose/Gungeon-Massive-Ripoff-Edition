@@ -87,6 +87,7 @@ func capture(player: Player) -> Dictionary:
 		"max_health": player.max_health,
 		"health": player.health,
 		"blanks": player.blanks,
+		"salves": player.salves,
 		"coins": player.coins,
 		"weapon_index": player.weapon_manager.current_index,
 		"guns": guns,
@@ -101,6 +102,7 @@ func apply(player: Player) -> void:
 	player.max_health = snapshot["max_health"]
 	player.health = snapshot["health"]
 	player.blanks = snapshot["blanks"]
+	player.salves = snapshot.get("salves", player.salves)
 	player.coins = snapshot["coins"]
 	var weapons := player.weapon_manager.weapons
 	for i in mini(weapons.size(), snapshot["guns"].size()):
@@ -120,3 +122,4 @@ func apply(player: Player) -> void:
 	player.health_changed.emit(player.health, player.max_health)
 	player.blanks_changed.emit(player.blanks, player.max_blanks)
 	player.coins_changed.emit(player.coins)
+	player.salves_changed.emit(player.salves, player.max_salves)

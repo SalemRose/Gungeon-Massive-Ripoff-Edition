@@ -52,6 +52,7 @@ const SHOP_STOCK := [
 	[Pickup.Kind.HEART, 12],
 	[Pickup.Kind.AMMO, 15],
 	[Pickup.Kind.BLANK, 20],
+	[Pickup.Kind.SALVE, 18],
 ]
 ## Prop spots, all clear of the door lines through the room's middle.
 const PILLAR_SPOTS := [Vector2(-90, -60), Vector2(90, -60), Vector2(-90, 60), Vector2(90, 60)]

@@ -34,6 +34,8 @@ func _ready() -> void:
 	_register("melee", [_key(KEY_F), _pad_button(JOY_BUTTON_RIGHT_SHOULDER)])
 	_register("blank", [_key(KEY_Q), _pad_button(JOY_BUTTON_LEFT_SHOULDER)])
 	_register("reload", [_key(KEY_R), _pad_button(JOY_BUTTON_X)])
+	# Salve: drink a carried healing salve (G / gamepad B).
+	_register("salve", [_key(KEY_G), _pad_button(JOY_BUTTON_B)])
 
 	# --- World / inventory ----------------------------------------------------
 	_register("interact", [_key(KEY_E), _pad_button(JOY_BUTTON_Y)])
