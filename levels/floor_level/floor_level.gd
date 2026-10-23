@@ -26,6 +26,7 @@ var room_camera: RoomCamera
 var minimap: Minimap
 var layout: FloorLayout
 var stairs: Stairs
+var pause_menu: PauseMenu
 var _show_map: bool = true
 var _uses_run: bool = false
 var _fade: ColorRect
@@ -83,6 +84,11 @@ func _ready() -> void:
 		create_tween().tween_property(_fade, "color:a", 0.0, fade_time)   # fade in
 	else:
 		_fade.color.a = 0.0
+	# Esc / Start pause menu; Abandon Run ends the run and goes back to the hub.
+	pause_menu = PauseMenu.new()
+	pause_menu.allow_abandon = true
+	pause_menu.abandon_requested.connect(_on_abandon)
+	add_child(pause_menu)
 	# When the boss dies and the room opens, the way down appears.
 	builder.boss_room().cleared.connect(_spawn_stairs)
 
@@ -145,6 +151,18 @@ func descend() -> void:
 		await tween.finished
 	if _uses_run and not Run.active:
 		_go_to_hub()   # the run is over
+	else:
+		_reload()
+
+
+## Pause menu -> Abandon Run: counts as a lost run (reward + stats), then hub.
+func _on_abandon() -> void:
+	if _leaving:
+		return
+	_leaving = true
+	Run.end_run(false, player)
+	if _uses_run:
+		_go_to_hub()
 	else:
 		_reload()
 

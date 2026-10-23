@@ -43,6 +43,7 @@ func _ready() -> void:
 	shop = UnlockShop.new()
 	add_child(shop)
 	_build_info_panel()
+	add_child(PauseMenu.new())   # Esc / Start (no Abandon Run in the hub)
 	player.global_position = Vector2(0.0, 70.0)
 
 

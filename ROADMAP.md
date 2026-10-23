@@ -16,7 +16,7 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 - Each segment: implement, test (headless), commit locally, zip changed files, send, brief explanation, update this roadmap
 - Screenshots are internal checks only, never sent
 - The user's own ROADMAP.txt (main menu and settings wishes) is theirs: do not touch it
-- Local commits not yet pushed: 9b, 10a, 10b, 10c, 11a, 11b, 12a, 12b, 12c, 13a, 13b, roadmap (last pushed: ROADMAP.md update)
+- Local commits not yet pushed: 9b, 10a, 10b, 10c, 11a, 11b, 12a, 12b, 12c, 13a, 13b, 13c, roadmap (last pushed: ROADMAP.md update)
 
 ## Game summary
 
@@ -55,10 +55,10 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 27. 12c Hub scene: new main scene; DUNGEON door starts a run, UNLOCKS terminal opens the shop (mouse, keyboard, gamepad); winning or dying returns to the hub and shows what the run paid
 28. 13a Main menu: title, New Game (asks before erasing progress), Load (greyed out without a save), Settings (placeholder until 13b), Quit; new main scene
 29. 13b Settings: resolution (5 standard 16:9 sizes), fullscreen toggle, music and sfx volume; saved, applied at startup, kept when you start a New Game; Music and SFX audio buses ready for when sounds exist
+30. 13c Pause menu: Esc / Start in the hub and the dungeon; Resume, Settings, Abandon Run (dungeon only, counts as a lost run and pays), Main Menu
 
 ## Next, in order
 
-13c Pause menu \
 14 Final art swap pass
 
 ## Notes
@@ -89,3 +89,4 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 - Main scene is now ui/menu/main_menu.tscn -> hub -> dungeon. Single save slot: New Game = SaveData.reset_all(), Load = keep progress; SaveData.has_progress() drives both
 - GameSettings (autoload) applies and saves the options; SettingsMenu is a reusable overlay (main menu now, pause menu in 13c). When adding sounds, set each AudioStreamPlayer's bus to "Music" or "SFX"
 - UI layout gotcha: use set_anchors_and_offsets_preset (not set_anchors_preset) to make a Control fill its parent
+- PauseMenu is a CanvasLayer each level adds itself (allow_abandon true in the dungeon); it ignores the pause key while another screen (unlock shop, settings) is open or the player is dead
