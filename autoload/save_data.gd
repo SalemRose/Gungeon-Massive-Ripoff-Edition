@@ -86,9 +86,12 @@ func has_progress() -> bool:
 	return int(data["runs_played"]) > 0 or int(data["currency"]) > 0 or not (data["unlocks"] as Array).is_empty()
 
 
-## Throws away all progress (a "delete save" button, and tests).
+## Throws away all progress (New Game, and tests) but keeps the options.
 func reset_all() -> void:
+	# Options (resolution, volume...) are not progress: they survive a reset.
+	var kept_settings: Variant = data.get("settings", {})
 	data = DEFAULTS.duplicate(true)
+	data["settings"] = kept_settings
 	save_game()
 	changed.emit()
 

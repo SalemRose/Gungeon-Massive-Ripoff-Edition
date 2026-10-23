@@ -2,7 +2,7 @@ extends Control
 ## The MAIN MENU: the first screen of the game.
 ##   NEW GAME  starts a fresh save (asks first if there is progress to lose)
 ##   LOAD      continues with the saved progress (greyed out if there is none)
-##   SETTINGS  options screen (built in step 13b)
+##   SETTINGS  options screen (resolution, fullscreen, volumes: SettingsMenu)
 ##   QUIT      exits
 ##
 ## Works with mouse, keyboard (arrows + Enter) and gamepad (D-pad + A).
@@ -14,7 +14,7 @@ extends Control
 
 ## Emitted instead of changing scene when a test drives the menu directly.
 signal scene_requested(path: String)
-signal settings_requested
+signal settings_opened
 
 const HUB_SCENE := "res://levels/hub/hub.tscn"
 const TITLE := "GUNGEON\nMASSIVE RIPOFF EDITION"
@@ -30,15 +30,15 @@ var _note: Label
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var background := ColorRect.new()
 	background.color = Color(0.07, 0.06, 0.1)
-	background.set_anchors_preset(Control.PRESET_FULL_RECT)
+	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(background)
 
 	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 14)
@@ -136,10 +136,16 @@ func _on_load() -> void:
 		_go(HUB_SCENE)
 
 
+## Shows the settings screen over the menu; the menu buttons come back when it closes.
 func _on_settings() -> void:
-	# The settings screen arrives in step 13b; until then say so.
-	_note.text = "Settings are not available yet."
-	settings_requested.emit()
+	_menu_box.visible = false
+	var menu := SettingsMenu.new()
+	menu.name = "SettingsMenu"
+	menu.closed.connect(func():
+		_menu_box.visible = true
+		settings_button.grab_focus.call_deferred())
+	add_child(menu)
+	settings_opened.emit()
 
 
 func _on_quit() -> void:

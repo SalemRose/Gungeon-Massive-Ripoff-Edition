@@ -19,6 +19,7 @@ config/icon="res://assets/icon.svg"
 
 InputSetup="*res://autoload/input_setup.gd"
 SaveData="*res://autoload/save_data.gd"
+GameSettings="*res://autoload/game_settings.gd"
 Run="*res://autoload/run.gd"
 
 [display]

@@ -16,7 +16,7 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 - Each segment: implement, test (headless), commit locally, zip changed files, send, brief explanation, update this roadmap
 - Screenshots are internal checks only, never sent
 - The user's own ROADMAP.txt (main menu and settings wishes) is theirs: do not touch it
-- Local commits not yet pushed: 9b, 10a, 10b, 10c, 11a, 11b, 12a, 12b, 12c, 13a, roadmap (last pushed: ROADMAP.md update)
+- Local commits not yet pushed: 9b, 10a, 10b, 10c, 11a, 11b, 12a, 12b, 12c, 13a, 13b, roadmap (last pushed: ROADMAP.md update)
 
 ## Game summary
 
@@ -54,10 +54,10 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 26. 12b Permanent currency/unlocks: runs pay hub currency (5 + 10 per floor cleared + 30 for winning + half your leftover coins); UnlockData/UnlockCatalog lock 6 guns and 3 items until bought (Pistol, SMG, Shotgun, Ricochet and the other items are free)
 27. 12c Hub scene: new main scene; DUNGEON door starts a run, UNLOCKS terminal opens the shop (mouse, keyboard, gamepad); winning or dying returns to the hub and shows what the run paid
 28. 13a Main menu: title, New Game (asks before erasing progress), Load (greyed out without a save), Settings (placeholder until 13b), Quit; new main scene
+29. 13b Settings: resolution (5 standard 16:9 sizes), fullscreen toggle, music and sfx volume; saved, applied at startup, kept when you start a New Game; Music and SFX audio buses ready for when sounds exist
 
 ## Next, in order
 
-13b Settings (resolutions, fullscreen, music/sfx volume) \
 13c Pause menu \
 14 Final art swap pass
 
@@ -87,3 +87,5 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 - A new unlock = an UnlockData .tres in unlocks/data/ pointing at a gun (file name in weapons/data/) or an item id; without an entry a gun/item is free from the start. Dev switch: run the game or tests with `-- --unlock-all`; the older test suites need it, test_unlocks must run without it
 - Main scene is now levels/hub/hub.tscn; floor_level goes back to the hub when a real run ends (fixed-seed test floors still just reload). HubStation = a usable thing in the hub (door, terminal); UnlockShop = the unlock screen (pauses the game while open)
 - Main scene is now ui/menu/main_menu.tscn -> hub -> dungeon. Single save slot: New Game = SaveData.reset_all(), Load = keep progress; SaveData.has_progress() drives both
+- GameSettings (autoload) applies and saves the options; SettingsMenu is a reusable overlay (main menu now, pause menu in 13c). When adding sounds, set each AudioStreamPlayer's bus to "Music" or "SFX"
+- UI layout gotcha: use set_anchors_and_offsets_preset (not set_anchors_preset) to make a Control fill its parent
