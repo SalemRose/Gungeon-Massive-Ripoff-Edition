@@ -59,7 +59,7 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 
 ## Next, in order
 
-14 Final art swap pass
+14 Final art swap pass (prepared: ART_GUIDE.md lists every placeholder, size and folder; waiting for the art / reference picture)
 
 ## Notes
 
