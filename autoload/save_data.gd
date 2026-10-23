@@ -80,6 +80,12 @@ func save_game() -> bool:
 	return DirAccess.rename_absolute(tmp, path) == OK
 
 
+## True if there is anything worth keeping: a finished run, currency or an
+## unlock. The main menu uses it to enable LOAD and to warn before NEW GAME.
+func has_progress() -> bool:
+	return int(data["runs_played"]) > 0 or int(data["currency"]) > 0 or not (data["unlocks"] as Array).is_empty()
+
+
 ## Throws away all progress (a "delete save" button, and tests).
 func reset_all() -> void:
 	data = DEFAULTS.duplicate(true)

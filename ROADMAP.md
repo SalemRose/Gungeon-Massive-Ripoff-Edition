@@ -16,7 +16,7 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 - Each segment: implement, test (headless), commit locally, zip changed files, send, brief explanation, update this roadmap
 - Screenshots are internal checks only, never sent
 - The user's own ROADMAP.txt (main menu and settings wishes) is theirs: do not touch it
-- Local commits not yet pushed: 9b, 10a, 10b, 10c, 11a, 11b, 12a, 12b, 12c, roadmap (last pushed: ROADMAP.md update)
+- Local commits not yet pushed: 9b, 10a, 10b, 10c, 11a, 11b, 12a, 12b, 12c, 13a, roadmap (last pushed: ROADMAP.md update)
 
 ## Game summary
 
@@ -53,10 +53,10 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 25. 12a Save system: SaveData autoload (versioned JSON in user://save.json, safe writes, corrupt-file backup, unlocks, currency, run stats); Run.end_run() records each finished run
 26. 12b Permanent currency/unlocks: runs pay hub currency (5 + 10 per floor cleared + 30 for winning + half your leftover coins); UnlockData/UnlockCatalog lock 6 guns and 3 items until bought (Pistol, SMG, Shotgun, Ricochet and the other items are free)
 27. 12c Hub scene: new main scene; DUNGEON door starts a run, UNLOCKS terminal opens the shop (mouse, keyboard, gamepad); winning or dying returns to the hub and shows what the run paid
+28. 13a Main menu: title, New Game (asks before erasing progress), Load (greyed out without a save), Settings (placeholder until 13b), Quit; new main scene
 
 ## Next, in order
 
-13a Main menu \
 13b Settings (resolutions, fullscreen, music/sfx volume) \
 13c Pause menu \
 14 Final art swap pass
@@ -86,3 +86,4 @@ Godot 4.7.2, GDScript, placeholder shapes for art (all visuals under a `Visual` 
 - `SaveData` (autoload) is the PERMANENT save (currency, unlocks, stats, settings); `Run` is the temporary run state. Add a new saved value by adding a key to SaveData.DEFAULTS; bump VERSION and fill _migrate() if a format ever changes
 - A new unlock = an UnlockData .tres in unlocks/data/ pointing at a gun (file name in weapons/data/) or an item id; without an entry a gun/item is free from the start. Dev switch: run the game or tests with `-- --unlock-all`; the older test suites need it, test_unlocks must run without it
 - Main scene is now levels/hub/hub.tscn; floor_level goes back to the hub when a real run ends (fixed-seed test floors still just reload). HubStation = a usable thing in the hub (door, terminal); UnlockShop = the unlock screen (pauses the game while open)
+- Main scene is now ui/menu/main_menu.tscn -> hub -> dungeon. Single save slot: New Game = SaveData.reset_all(), Load = keep progress; SaveData.has_progress() drives both
